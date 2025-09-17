@@ -24,21 +24,21 @@ const SITE_NAME = "SamJoorNetwork";
 /* ---------- Profile Data ---------- */
 const profile = {
   name: "Sam Joor",
-  headline: "Full-Stack Developer • Data Science • Cybersecurity",
-  location: "New Haven, CT",
+  headline: "Full-Stack Developer • Cybersecurity Entusiast ",
+  location: "Boston, MA",
   avatarInitials: "SJ",
   about:
-    "I build fast, delightful web apps, data tools, and security automation. On a mission to ship, learn, and have fun.",
+    "I love learning especially when its cybersecurity/computer related... 💻🤓💻",
   badges: [
     { icon: Award, label: "Top 1% Debugger" },
     { icon: Sparkles, label: "Typescript Enjoyer" },
     { icon: Briefcase, label: "Open to Collab" },
   ],
   links: [
-    { icon: Github, label: "GitHub", href: "https://github.com/" },
+    { icon: Github, label: "GitHub", href: "https://github.com/SamJoor?tab=repositories" },
     { icon: Globe, label: "Website", href: "https://example.com" },
-    { icon: Linkedin, label: "LinkedIn", href: "https://linkedin.com/in/" },
-    { icon: Mail, label: "Email", href: "mailto:you@example.com" },
+    { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/samjoor/" },
+    { icon: Mail, label: "skjoor@quinnipiac.edu", href: "mailto:skjoor@quinnipiac.edu" },
   ],
 };
 
@@ -162,35 +162,55 @@ export default function DevLinkd() {
 }
 
 /* ---------- Top Navigation ---------- */
+import Link from "next/link";
+import { Code2 as CodeIcon, User } from "lucide-react"; // swap icons if you like
+
 function TopNav() {
   return (
     <div className="sticky top-0 z-50 border-b border-zinc-200 bg-white/70 backdrop-blur">
       <div className="container-page h-14 flex items-center justify-between">
+        {/* Logo + site name */}
         <div className="flex items-center gap-2">
           <LogoSJ className="h-7 w-7" />
-          <span className="font-bold tracking-tight">{SITE_NAME}</span>
+          <Link href="/" className="font-bold tracking-tight">
+            {SITE_NAME}
+          </Link>
         </div>
 
-        <div className="hidden md:flex items-center gap-1">
-          <NavButton icon={Code2} label="Projects" />
-          <NavButton icon={Briefcase} label="Experience" />
-          <NavButton icon={Star} label="Highlights" />
-        </div>
+        {/* Nav links */}
+        <nav className="hidden md:flex items-center gap-1">
+          <NavLink href="/" label="Home" icon={User} />
+          <NavLink href="/projects" label="Projects" icon={Code2} />
+          <NavLink href="/aboutme" label="About me" icon={User} />
+        </nav>
 
+        {/* Actions (resume + connect) */}
         <div className="flex items-center gap-2">
-          <a href="#" className="btn">Download Resume</a>
-          <a href="#" className="btn-primary">Connect</a>
+          <a href="/SamJoorResume.pdf" download className="btn">
+            Download Resume
+          </a>
+          <a href="mailto:samjoor@example.com" className="btn-primary">
+            Connect
+          </a>
         </div>
       </div>
     </div>
   );
 }
 
-function NavButton({ icon: Icon, label }: { icon: any; label: string }) {
+function NavLink({
+  href,
+  icon: Icon,
+  label,
+}: {
+  href: string;
+  icon: any;
+  label: string;
+}) {
   return (
-    <button className="btn">
+    <Link href={href} className="btn">
       <Icon className="size-4" /> {label}
-    </button>
+    </Link>
   );
 }
 
@@ -269,8 +289,9 @@ function IntroPost() {
         </div>
       </div>
       <div className="mt-3 text-sm leading-relaxed">
-        🚀 Shipping season. I turned my portfolio into a LinkedIn-style feed to list
-        projects like “roles.” Open to fun collabs & code reviews — say hi!
+        Hey everyone 👋, I turned my resume into a LinkedIn-style feed to list my
+        projects and introduce myself in a way that hopefully feels a little more 
+        interesting then reading a piece of paper 😄.
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
         {"JavaScript Typescript Next.js Tailwind Framer Motion Python SQL PowerShell"
@@ -342,6 +363,8 @@ function ContactCard() {
           <a
             key={i}
             href={l.href}
+            target="_blank"                // 👈 opens in new tab
+            rel="noopener noreferrer"     // 👈 security best practice
             className="w-full inline-flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50"
           >
             <span className="inline-flex items-center gap-2 text-sm">
@@ -360,14 +383,12 @@ function QuickLinks() {
     <Card className="p-4">
       <SectionTitle icon={LinkIcon}>Quick links</SectionTitle>
       <ul className="mt-3 text-sm leading-7">
-        <li><a className="hover:underline" href="#">Resume.pdf</a></li>
-        <li><a className="hover:underline" href="#">Key Projects</a></li>
-        <li><a className="hover:underline" href="#">Speaking & Mentoring</a></li>
-        <li><a className="hover:underline" href="#">Reading List</a></li>
+        <li><a className="hover:underline" href="/SamJoorResume.pdf" target="_blank" rel="noopener noreferrer">Resume.pdf</a></li>
       </ul>
     </Card>
   );
 }
+
 
 /* ---------- Footer ---------- */
 function Footer() {
