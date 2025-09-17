@@ -177,7 +177,7 @@ function TopNav() {
         <nav className="hidden md:flex items-center gap-1">
           <NavLink href="/" label="Home" icon={User} />
           <NavLink href="/projects" label="Projects" icon={Code2} />
-          <NavLink href="/about" label="About me" icon={User} />
+          <NavLink href="/aboutme" label="About me" icon={User} />
         </nav>
 
         {/* Right actions (always visible) */}
