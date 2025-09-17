@@ -134,29 +134,39 @@ export default function DevLinkd() {
 
 /* ---------- Top Navigation ---------- */
 import Link from "next/link";
-import { Code2 as CodeIcon, User } from "lucide-react"; // swap icons if you like
+import { Code2 as CodeIcon, User } from "lucide-react"; // alias used below
 
 function TopNav() {
   return (
     <div className="sticky top-0 z-50 border-b border-zinc-200 bg-white/70 backdrop-blur">
-      <div className="container-page h-14 flex items-center justify-between">
+      <div className="container-page h-14 flex items-center justify-between gap-2">
         {/* Logo + site name */}
-        <div className="flex items-center gap-2">
-          <LogoSJ className="h-7 w-7" />
-          <Link href="/" className="font-bold tracking-tight">
+        <div className="flex items-center gap-2 min-w-0">
+          <LogoSJ className="h-7 w-7 shrink-0" />
+          <Link href="/" className="font-bold tracking-tight truncate">
             {SITE_NAME}
           </Link>
         </div>
 
-        {/* Nav links */}
-        <nav className="hidden md:flex items-center gap-1">
-          <NavLink href="/" label="Home" icon={User} />
-          <NavLink href="/projects" label="Projects" icon={Code2} />
-          <NavLink href="/aboutme" label="About me" icon={User} />
+        {/* Nav links (now visible on mobile; scrolls if needed) */}
+        <nav
+          role="navigation"
+          aria-label="Primary"
+          className="flex items-center gap-1 md:gap-2 overflow-x-auto overscroll-contain -mx-2 px-2 md:mx-0 md:px-0"
+        >
+          <div className="shrink-0">
+            <NavLink href="/" label="Home" icon={User} />
+          </div>
+          <div className="shrink-0">
+            <NavLink href="/projects" label="Projects" icon={CodeIcon} />
+          </div>
+          <div className="shrink-0">
+            <NavLink href="/aboutme" label="About me" icon={User} />
+          </div>
         </nav>
 
-        {/* Actions (resume + connect) */}
-        <div className="flex items-center gap-2">
+        {/* Actions (resume + connect) — hide on xs to keep room */}
+        <div className="hidden sm:flex items-center gap-2">
           <a href="/SamJoorResume.pdf" download className="btn">
             Download Resume
           </a>
@@ -168,6 +178,7 @@ function TopNav() {
     </div>
   );
 }
+
 
 function NavLink({
   href,
