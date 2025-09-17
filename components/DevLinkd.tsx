@@ -135,17 +135,19 @@ export default function DevLinkd() {
 /* ---------- Top Navigation ---------- */
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { Menu, X, User, Code2 as CodeIcon } from "lucide-react";
 
 function TopNav() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();              // close on route change
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Close on escape
+  useEffect(() => { if (open) setOpen(false); }, [pathname]);
+
+  // Close on ESC
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") setOpen(false); }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
@@ -154,33 +156,29 @@ function TopNav() {
   useEffect(() => {
     function onClick(e: MouseEvent) {
       if (!open) return;
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) setOpen(false);
     }
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
 
   return (
-    <div className="sticky top-0 z-50 border-b border-zinc-200 bg-white/70 backdrop-blur">
+    <div className={`sticky top-0 z-50 border-b border-zinc-200 bg-white/70 backdrop-blur ${open ? "shadow-sm" : ""}`}>
       <div className="container-page h-14 flex items-center justify-between">
-        {/* Logo + site name (clickable Home) */}
+        {/* Logo + site name */}
         <div className="flex items-center gap-2">
           <LogoSJ className="h-7 w-7" />
-          <Link href="/" className="font-bold tracking-tight">
-            {SITE_NAME}
-          </Link>
+          <Link href="/" className="font-bold tracking-tight">{SITE_NAME}</Link>
         </div>
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
           <NavLink href="/" label="Home" icon={User} />
-          <NavLink href="/projects" label="Projects" icon={Code2} />
-          <NavLink href="/aboutme" label="About me" icon={User} />
+          <NavLink href="/projects" label="Projects" icon={CodeIcon} />
+          <NavLink href="/aboutme" label="About me" icon={User} /> {/* <-- matches your route */}
         </nav>
 
-        {/* Right actions (always visible) */}
+        {/* Desktop actions */}
         <div className="hidden md:flex items-center gap-2">
           <a href="/SamJoorResume.pdf" download className="btn">Download Resume</a>
           <a href="mailto:skjoor@quinnipiac.edu" className="btn-primary">Connect</a>
@@ -189,10 +187,8 @@ function TopNav() {
         {/* Mobile hamburger */}
         <button
           className="md:hidden inline-flex items-center justify-center p-2 rounded-lg border border-zinc-300"
-          aria-label="Open menu"
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-          onClick={() => setOpen((s) => !s)}
+          aria-label="Toggle menu" aria-expanded={open} aria-controls="mobile-menu"
+          onClick={() => setOpen(s => !s)}
         >
           {open ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
@@ -200,51 +196,16 @@ function TopNav() {
 
       {/* Mobile panel */}
       {open && (
-        <div
-          id="mobile-menu"
-          ref={panelRef}
-          className="md:hidden border-t border-zinc-200 bg-white/95 backdrop-blur-sm"
-        >
+        <div id="mobile-menu" ref={panelRef} className="md:hidden border-t border-zinc-200 bg-white/95 backdrop-blur-sm z-[60]">
           <div className="container-page py-3 flex flex-col gap-2">
-            <Link
-              href="/"
-              className="btn"
-              onClick={() => setOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              href="/projects"
-              className="btn"
-              onClick={() => setOpen(false)}
-            >
-              Projects
-            </Link>
-            <Link
-              href="/about"
-              className="btn"
-              onClick={() => setOpen(false)}
-            >
-              About me
-            </Link>
+            <Link href="/" className="btn">Home</Link>
+            <Link href="/projects" className="btn">Projects</Link>
+            <Link href="/aboutme" className="btn">About me</Link> {/* <-- fixed path */}
 
             <div className="mt-2 h-px bg-zinc-200" />
 
-            <a
-              href="/SamJoorResume.pdf"
-              download
-              className="btn"
-              onClick={() => setOpen(false)}
-            >
-              Download Resume
-            </a>
-            <a
-              href="mailto:skjoor@quinnipiac.edu"
-              className="btn-primary text-center"
-              onClick={() => setOpen(false)}
-            >
-              Connect
-            </a>
+            <a href="/SamJoorResume.pdf" download className="btn">Download Resume</a>
+            <a href="mailto:skjoor@quinnipiac.edu" className="btn-primary text-center">Connect</a>
           </div>
         </div>
       )}
@@ -253,23 +214,14 @@ function TopNav() {
 }
 
 function NavLink({
-  href,
-  icon: Icon,
-  label,
-}: {
-  href: string;
-  icon?: any;
-  label: string;
-}) {
+  href, label, icon: Icon,
+}: { href: string; label: string; icon?: any }) {
   return (
     <Link href={href} className="btn">
       {Icon ? <Icon className="size-4" /> : null} {label}
     </Link>
   );
 }
-
-
-
 /* ---------- Left Column ---------- */
 function ProfileCard() {
   return (
