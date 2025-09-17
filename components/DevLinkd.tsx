@@ -134,51 +134,123 @@ export default function DevLinkd() {
 
 /* ---------- Top Navigation ---------- */
 import Link from "next/link";
-import { Code2 as CodeIcon, User } from "lucide-react"; // alias used below
+import { useState, useEffect, useRef } from "react";
+import { Menu, X, User, Code2 as CodeIcon } from "lucide-react";
 
 function TopNav() {
+  const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Close on escape
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Close when clicking outside
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (!open) return;
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [open]);
+
   return (
     <div className="sticky top-0 z-50 border-b border-zinc-200 bg-white/70 backdrop-blur">
-      <div className="container-page h-14 flex items-center justify-between gap-2">
-        {/* Logo + site name */}
-        <div className="flex items-center gap-2 min-w-0">
-          <LogoSJ className="h-7 w-7 shrink-0" />
-          <Link href="/" className="font-bold tracking-tight truncate">
+      <div className="container-page h-14 flex items-center justify-between">
+        {/* Logo + site name (clickable Home) */}
+        <div className="flex items-center gap-2">
+          <LogoSJ className="h-7 w-7" />
+          <Link href="/" className="font-bold tracking-tight">
             {SITE_NAME}
           </Link>
         </div>
 
-        {/* Nav links (now visible on mobile; scrolls if needed) */}
-        <nav
-          role="navigation"
-          aria-label="Primary"
-          className="flex items-center gap-1 md:gap-2 overflow-x-auto overscroll-contain -mx-2 px-2 md:mx-0 md:px-0"
-        >
-          <div className="shrink-0">
-            <NavLink href="/" label="Home" icon={User} />
-          </div>
-          <div className="shrink-0">
-            <NavLink href="/projects" label="Projects" icon={CodeIcon} />
-          </div>
-          <div className="shrink-0">
-            <NavLink href="/aboutme" label="About me" icon={User} />
-          </div>
+        {/* Desktop nav */}
+        <nav className="hidden md:flex items-center gap-1">
+          <NavLink href="/" label="Home" icon={User} />
+          <NavLink href="/projects" label="Projects" icon={Code2} />
+          <NavLink href="/about" label="About me" icon={User} />
         </nav>
 
-        {/* Actions (resume + connect) — hide on xs to keep room */}
-        <div className="hidden sm:flex items-center gap-2">
-          <a href="/SamJoorResume.pdf" download className="btn">
-            Download Resume
-          </a>
-          <a href="mailto:samjoor@example.com" className="btn-primary">
-            Connect
-          </a>
+        {/* Right actions (always visible) */}
+        <div className="hidden md:flex items-center gap-2">
+          <a href="/SamJoorResume.pdf" download className="btn">Download Resume</a>
+          <a href="mailto:skjoor@quinnipiac.edu" className="btn-primary">Connect</a>
         </div>
+
+        {/* Mobile hamburger */}
+        <button
+          className="md:hidden inline-flex items-center justify-center p-2 rounded-lg border border-zinc-300"
+          aria-label="Open menu"
+          aria-expanded={open}
+          aria-controls="mobile-menu"
+          onClick={() => setOpen((s) => !s)}
+        >
+          {open ? <X className="size-5" /> : <Menu className="size-5" />}
+        </button>
       </div>
+
+      {/* Mobile panel */}
+      {open && (
+        <div
+          id="mobile-menu"
+          ref={panelRef}
+          className="md:hidden border-t border-zinc-200 bg-white/95 backdrop-blur-sm"
+        >
+          <div className="container-page py-3 flex flex-col gap-2">
+            <Link
+              href="/"
+              className="btn"
+              onClick={() => setOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
+              href="/projects"
+              className="btn"
+              onClick={() => setOpen(false)}
+            >
+              Projects
+            </Link>
+            <Link
+              href="/about"
+              className="btn"
+              onClick={() => setOpen(false)}
+            >
+              About me
+            </Link>
+
+            <div className="mt-2 h-px bg-zinc-200" />
+
+            <a
+              href="/SamJoorResume.pdf"
+              download
+              className="btn"
+              onClick={() => setOpen(false)}
+            >
+              Download Resume
+            </a>
+            <a
+              href="mailto:skjoor@quinnipiac.edu"
+              className="btn-primary text-center"
+              onClick={() => setOpen(false)}
+            >
+              Connect
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
 
 function NavLink({
   href,
@@ -186,15 +258,17 @@ function NavLink({
   label,
 }: {
   href: string;
-  icon: any;
+  icon?: any;
   label: string;
 }) {
   return (
     <Link href={href} className="btn">
-      <Icon className="size-4" /> {label}
+      {Icon ? <Icon className="size-4" /> : null} {label}
     </Link>
   );
 }
+
+
 
 /* ---------- Left Column ---------- */
 function ProfileCard() {
