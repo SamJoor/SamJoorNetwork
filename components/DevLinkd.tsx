@@ -1,5 +1,6 @@
 'use client';
 
+import ProjectCard from "@/components/ProjectCard";
 import React from "react";
 import { motion } from "framer-motion";
 import {
@@ -16,6 +17,7 @@ import {
   Award,
   Briefcase,
   Sparkles,
+  Apple,
 } from "lucide-react";
 
 /* ---------- Branding ---------- */
@@ -30,9 +32,8 @@ const profile = {
   about:
     "I love learning especially when its cybersecurity/computer related... 💻🤓💻",
   badges: [
-    { icon: Award, label: "Top 1% Debugger" },
-    { icon: Sparkles, label: "Typescript Enjoyer" },
-    { icon: Briefcase, label: "Open to Collab" },
+    { icon: Apple, label: "Student" },
+    { icon: Briefcase, label: "Unemployed" },
   ],
   links: [
     { icon: Github, label: "GitHub", href: "https://github.com/SamJoor?tab=repositories" },
@@ -42,57 +43,28 @@ const profile = {
   ],
 };
 
+
 /* ---------- Projects ---------- */
-const projects = [
-  {
-    title: "ABSTRXT — Animated Portfolio + Store",
-    role: "Next.js • Tailwind • Framer Motion",
-    date: "2025",
-    blurb:
-      "Interactive, blob-driven navbar with password gate, SVG logo pieces as motion components, and Vercel deploy.",
-    tags: ["Next.js", "Tailwind", "Framer Motion", "TypeScript"],
-    highlights: [
-      "Custom SVG motion components with drag physics",
-      "Password-gated home with togglable protection",
-      "Mobile-first design, 95+ Lighthouse",
-    ],
-    links: [
-      { label: "Repo", href: "#", icon: Github },
-      { label: "Live", href: "#", icon: ExternalLink },
-    ],
-  },
-  {
-    title: "Win Sandbox Orchestrator",
-    role: "PowerShell • VirtualBox • Sysmon/Procmon",
-    date: "2025",
-    blurb:
-      "One-command malware detonation lab: start VM, run task, collect logs, archive artifacts to host.",
-    tags: ["PowerShell", "VirtualBox", "Automation", "Security"],
-    highlights: [
-      "Headless VM control via VBoxManage guestcontrol",
-      "Scheduled task runner w/ SYSTEM privileges",
-      "Log bundling & timestamped reports",
-    ],
-    links: [{ label: "Docs", href: "#", icon: LinkIcon }],
-  },
-  {
-    title: "Solana Analytics Mini-Site",
-    role: "Next.js • RPC • Charts",
-    date: "2025",
-    blurb:
-      "Token dashboard with price, volume, holders, whale alerts, and wallet drill-downs.",
-    tags: ["Next.js", "Charting", "ETL", "Solana"],
-    highlights: [
-      "Server actions for fresh on-demand RPCs",
-      "CSV export + shareable deep links",
-      "Zero-JS charts on static pages where possible",
-    ],
-    links: [
-      { label: "Repo", href: "#", icon: Github },
-      { label: "Live", href: "#", icon: ExternalLink },
-    ],
-  },
-];
+const featuredProject = {
+  title: "Automated Windows Sandbox (WIP) ",
+  role: "VirtualBox • Sysmon/Procmon/Wireshark • Powershell",
+  date: "2025",
+  blurb:
+    "A fully automated malware analysis sandbox on VirtualBox that uses tools such as WireShark, Procmon and Sysmon. With just one command, it boots a Windows VM, executes, and gathers logs from Sysmon, Procmon, and Wireshark. Results are returned to the host machine to allow for reverse-engineering and forensic analysis.",
+  tags: ["VirtualBox", "Powershell automation", "Sysmon + Procmon", "Wireshark"],
+  highlights: [
+    "One-command automation: spin up, execute, and collect logs",
+    "Host stored results for analysis",
+    "Built for malware detonation and reverse-engineering,",
+    "Centralized log collection"
+  ],
+  links: [
+    { label: "Repo", href: "https://github.com/your/repo" },
+    { label: "Live", href: "https://your-live-site.com" },
+  ],
+  progress: 30, 
+  status: "Debugging automation errors", 
+};
 
 /* ---------- Reusable UI ---------- */
 const Card = ({
@@ -140,7 +112,6 @@ export default function DevLinkd() {
         {/* Left column */}
         <div className="lg:col-span-3 space-y-6">
           <ProfileCard />
-          <AboutCard />
           <BadgesCard />
         </div>
 
@@ -238,9 +209,7 @@ function ProfileCard() {
         </div>
         <div className="flex-1">
           <div className="flex flex-wrap gap-2">
-            <Pill>Open to work</Pill>
-            <Pill>Freelance</Pill>
-            <Pill>Mentorship</Pill>
+            <Pill>Looking For Work👨‍💻💼🙏</Pill>
           </div>
         </div>
       </div>
@@ -248,14 +217,6 @@ function ProfileCard() {
   );
 }
 
-function AboutCard() {
-  return (
-    <Card className="p-4">
-      <SectionTitle icon={InfoIcon}>About</SectionTitle>
-      <p className="text-sm text-zinc-700 mt-2 leading-relaxed">{profile.about}</p>
-    </Card>
-  );
-}
 
 function BadgesCard() {
   return (
@@ -291,7 +252,7 @@ function IntroPost() {
       <div className="mt-3 text-sm leading-relaxed">
         Hey everyone 👋, I turned my resume into a LinkedIn-style feed to list my
         projects and introduce myself in a way that hopefully feels a little more 
-        interesting then reading a piece of paper 😄.
+        engaging then reading a piece of paper 😄.
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
         {"JavaScript Typescript Next.js Tailwind Framer Motion Python SQL PowerShell"
@@ -304,54 +265,106 @@ function IntroPost() {
   );
 }
 
-function ProjectsFeed() {
+function ProgressBar({
+  value,
+  label,
+}: {
+  value: number; // 0..100
+  label?: string;
+}) {
+  const pct = Math.max(0, Math.min(100, Math.round(value)));
+  const color =
+    pct < 34 ? "bg-blue-500" : pct < 67 ? "bg-turqoise-500" : "bg-emerald-500";
+
   return (
-    <div className="space-y-4">
-      {projects.map((p, idx) => (
-        <motion.div
-          key={idx}
-          initial={{ opacity: 0, y: 8 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.35 }}
-        >
-          <Card className="p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="text-sm text-zinc-500 flex items-center gap-2">
-                  <CalendarDays className="size-4" /> {p.date}
-                </div>
-                <h3 className="text-lg font-semibold mt-1">{p.title}</h3>
-                <div className="text-sm text-zinc-600">{p.role}</div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {p.links?.map((l, i) => (
-                  <LinkButton key={i} href={l.href}>
-                    <l.icon className="size-4" /> {l.label}
-                  </LinkButton>
-                ))}
-              </div>
-            </div>
-
-            <p className="text-sm text-zinc-700 mt-3 leading-relaxed">{p.blurb}</p>
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              {p.tags.map((t) => (
-                <Pill key={t}>{t}</Pill>
-              ))}
-            </div>
-
-            <ul className="mt-3 grid gap-2 sm:grid-cols-2 list-disc list-inside text-sm text-zinc-700">
-              {p.highlights.map((h, i) => (
-                <li key={i}>{h}</li>
-              ))}
-            </ul>
-          </Card>
-        </motion.div>
-      ))}
+    <div
+      className="mt-4 select-none"
+      role="progressbar"
+      aria-label={label ?? "Project progress"}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={pct}
+      title={`${pct}% complete`}
+    >
+      <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200">
+        <div className={`h-2 ${color}`} style={{ width: `${pct}%` }} />
+      </div>
+      <div className="mt-1 flex items-center justify-between text-[10px] text-zinc-500">
+        <span>{pct < 100 ? "In progress" : "Complete"}</span>
+        <span className="tabular-nums">{pct}%</span>
+      </div>
     </div>
   );
 }
+
+function ProjectsFeed() {
+  const p = featuredProject;
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold">
+        ⬇️ ✨My favorite project at the moment✨ ⬇️
+      </h2>
+
+      <Card className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="text-sm text-zinc-500 flex items-center gap-2">
+              <CalendarDays className="size-4" /> {p.date}
+            </div>
+            <h3 className="text-lg font-semibold mt-1">{p.title}</h3>
+            <div className="text-sm text-zinc-600">{p.role}</div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {p.links?.map((l, i) => (
+              <LinkButton key={i} href={l.href}>
+                {l.label}
+              </LinkButton>
+            ))}
+          </div>
+        </div>
+
+        <p className="text-sm text-zinc-700 mt-3 leading-relaxed">{p.blurb}</p>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {p.tags.map((t) => (
+            <Pill key={t}>{t}</Pill>
+          ))}
+        </div>
+
+        {p.highlights?.length ? (
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2 list-disc list-inside text-sm text-zinc-700">
+            {p.highlights.map((h, i) => (
+              <li key={i}>{h}</li>
+            ))}
+          </ul>
+        ) : null}
+
+        {/* NEW: status + progress */}
+        {typeof p.progress === "number" || p.status ? (
+          <div className="mt-2">
+            {p.status ? (
+              <p className="text-xs text-zinc-500">
+                <span className="font-medium">Current status:</span> {p.status}
+              </p>
+            ) : null}
+            {typeof p.progress === "number" ? (
+              <ProgressBar value={p.progress} label="Automated Windows Sandbox progress" />
+            ) : null}
+          </div>
+        ) : null}
+      </Card>
+
+      {/* keep your CTA if you had one here */}
+      <div>
+        <a href="/projects" className="btn">See all projects →</a>
+      </div>
+    </div>
+  );
+}
+
+
 
 /* ---------- Right Column ---------- */
 function ContactCard() {
@@ -447,3 +460,5 @@ function InfoIcon(props: any) {
     </svg>
   );
 }
+
+
