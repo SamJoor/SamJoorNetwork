@@ -181,15 +181,26 @@ function TopNav() {
           <NavLink href="/aboutme" label="About me" icon={User} />
         </nav>
 
-        {/* Desktop actions */}
+        {/* Desktop actions (with playful hover) */}
         <div className="hidden md:flex items-center gap-2">
-          <a href="/SamJoorResume.pdf" download className="btn">Download Resume</a>
-          <a href="mailto:skjoor@quinnipiac.edu" className="btn-primary">Connect</a>
+          <a
+            href="/SamJoorResume.pdf"
+            download
+            className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
+          >
+            Download Resume
+          </a>
+          <a
+            href="mailto:skjoor@quinnipiac.edu"
+            className="btn-primary transform transition duration-200 ease-out hover:scale-110 hover:rotate-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
+          >
+            Connect
+          </a>
         </div>
 
         {/* Hamburger (mobile) */}
         <button
-          className="md:hidden inline-flex items-center justify-center p-2 rounded-lg border border-zinc-300"
+          className="md:hidden inline-flex items-center justify-center p-2 rounded-lg border border-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
           aria-label="Toggle menu"
           aria-expanded={open}
           aria-controls="mobile-menu"
@@ -207,15 +218,33 @@ function TopNav() {
           className="md:hidden z-[60] border-t border-zinc-200 bg-white/95 backdrop-blur-sm"
         >
           <div className="container-page py-3 flex flex-col gap-2">
-            {/* Use real Links, no preventDefault/onClick hacks */}
-            <Link href="/" className="btn">Home</Link>
-            <Link href="/projects" className="btn">Projects</Link>
-            <Link href="/aboutme" className="btn">About me</Link>
+            {/* Internal links — same hover effects for consistency */}
+            <Link href="/" className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2">
+              Home
+            </Link>
+            <Link href="/projects" className="btn transform transition duration-200 ease-out hover:scale-110 hover:rotate-2">
+              Projects
+            </Link>
+            <Link href="/aboutme" className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2">
+              About me
+            </Link>
 
             <div className="mt-2 h-px bg-zinc-200" />
 
-            <a href="/SamJoorResume.pdf" download className="btn">Download Resume</a>
-            <a href="mailto:skjoor@quinnipiac.edu" className="btn-primary text-center">Connect</a>
+            {/* Actions on mobile (same vibe) */}
+            <a
+              href="/SamJoorResume.pdf"
+              download
+              className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2"
+            >
+              Download Resume
+            </a>
+            <a
+              href="mailto:skjoor@quinnipiac.edu"
+              className="btn-primary text-center transform transition duration-200 ease-out hover:scale-110 hover:rotate-2"
+            >
+              Connect
+            </a>
           </div>
         </div>
       )}
@@ -223,9 +252,20 @@ function TopNav() {
   );
 }
 
-function NavLink({ href, label, icon: Icon }: { href: string; label: string; icon?: any }) {
+function NavLink({
+  href,
+  label,
+  icon: Icon,
+}: {
+  href: string;
+  label: string;
+  icon?: any;
+}) {
   return (
-    <Link href={href} className="btn">
+    <Link
+      href={href}
+      className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
+    >
       {Icon ? <Icon className="size-4" /> : null} {label}
     </Link>
   );
