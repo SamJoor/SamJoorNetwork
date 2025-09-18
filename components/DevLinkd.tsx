@@ -140,42 +140,45 @@ import { Menu, X, User, Code2 as CodeIcon } from "lucide-react";
 
 function TopNav() {
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();              // close on route change
+  const pathname = usePathname();
   const panelRef = useRef<HTMLDivElement>(null);
 
+  // Close sheet on route change
   useEffect(() => { if (open) setOpen(false); }, [pathname]);
 
   // Close on ESC
   useEffect(() => {
-    function onKey(e: KeyboardEvent) { if (e.key === "Escape") setOpen(false); }
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Close when clicking outside
+  // Close when clicking outside the panel
   useEffect(() => {
-    function onClick(e: MouseEvent) {
+    const onClick = (e: MouseEvent) => {
       if (!open) return;
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) setOpen(false);
-    }
+    };
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
 
   return (
     <div className={`sticky top-0 z-50 border-b border-zinc-200 bg-white/70 backdrop-blur ${open ? "shadow-sm" : ""}`}>
-      <div className="container-page h-14 flex items-center justify-between">
+      <div className="container-page h-14 flex items-center justify-between gap-2">
         {/* Logo + site name */}
-        <div className="flex items-center gap-2">
-          <LogoSJ className="h-7 w-7" />
-          <Link href="/" className="font-bold tracking-tight">{SITE_NAME}</Link>
+        <div className="flex items-center gap-2 min-w-0">
+          <LogoSJ className="h-7 w-7 shrink-0" />
+          <Link href="/" className="font-bold tracking-tight truncate">
+            {SITE_NAME}
+          </Link>
         </div>
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
           <NavLink href="/" label="Home" icon={User} />
           <NavLink href="/projects" label="Projects" icon={CodeIcon} />
-          <NavLink href="/aboutme" label="About me" icon={User} /> {/* <-- matches your route */}
+          <NavLink href="/aboutme" label="About me" icon={User} />
         </nav>
 
         {/* Desktop actions */}
@@ -184,23 +187,30 @@ function TopNav() {
           <a href="mailto:skjoor@quinnipiac.edu" className="btn-primary">Connect</a>
         </div>
 
-        {/* Mobile hamburger */}
+        {/* Hamburger (mobile) */}
         <button
           className="md:hidden inline-flex items-center justify-center p-2 rounded-lg border border-zinc-300"
-          aria-label="Toggle menu" aria-expanded={open} aria-controls="mobile-menu"
+          aria-label="Toggle menu"
+          aria-expanded={open}
+          aria-controls="mobile-menu"
           onClick={() => setOpen(s => !s)}
         >
           {open ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
       </div>
 
-      {/* Mobile panel */}
+      {/* Mobile sheet */}
       {open && (
-        <div id="mobile-menu" ref={panelRef} className="md:hidden border-t border-zinc-200 bg-white/95 backdrop-blur-sm z-[60]">
+        <div
+          id="mobile-menu"
+          ref={panelRef}
+          className="md:hidden z-[60] border-t border-zinc-200 bg-white/95 backdrop-blur-sm"
+        >
           <div className="container-page py-3 flex flex-col gap-2">
+            {/* Use real Links, no preventDefault/onClick hacks */}
             <Link href="/" className="btn">Home</Link>
             <Link href="/projects" className="btn">Projects</Link>
-            <Link href="/aboutme" className="btn">About me</Link> {/* <-- fixed path */}
+            <Link href="/aboutme" className="btn">About me</Link>
 
             <div className="mt-2 h-px bg-zinc-200" />
 
@@ -213,15 +223,14 @@ function TopNav() {
   );
 }
 
-function NavLink({
-  href, label, icon: Icon,
-}: { href: string; label: string; icon?: any }) {
+function NavLink({ href, label, icon: Icon }: { href: string; label: string; icon?: any }) {
   return (
     <Link href={href} className="btn">
       {Icon ? <Icon className="size-4" /> : null} {label}
     </Link>
   );
 }
+
 /* ---------- Left Column ---------- */
 function ProfileCard() {
   return (
