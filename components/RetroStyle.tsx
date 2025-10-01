@@ -1,25 +1,60 @@
+// components/RetroStyle.tsx
 "use client";
+
 import { useEffect, useState } from "react";
-import { unlockEgg } from "@/lib/eggProgress";
+import { isRetroEnabled, retroRemainingMs, disableRetro } from "@/lib/retro";
 
 export default function RetroStyle() {
-  const [enabled, setEnabled] = useState(false);
+  const [on, setOn] = useState(false);
+  const [remaining, setRemaining] = useState(0);
 
+  // React to changes (manual toggle or other triggers)
   useEffect(() => {
-    const on = new URLSearchParams(window.location.search).get("retro") === "1";
-    setEnabled(on);
-    if (on) unlockEgg("retro");
+    const apply = () => {
+      const active = isRetroEnabled();
+      setOn(active);
+      setRemaining(active ? retroRemainingMs() : 0);
+    };
+    apply();
+    const handler = () => apply();
+    window.addEventListener("retro:change", handler);
+    return () => window.removeEventListener("retro:change", handler);
   }, []);
 
-  if (!enabled) return null;
+  // Manage <html class="retro"> and a 1s timer that counts down & auto-disables
+  useEffect(() => {
+    const el = document.documentElement;
+    if (on) el.classList.add("retro");
+    else el.classList.remove("retro");
+
+    if (!on) return;
+
+    const tick = () => {
+      const left = retroRemainingMs();
+      setRemaining(left);
+      if (left <= 0) {
+        disableRetro();
+        setOn(false);
+      }
+    };
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [on]);
+
+  // Tiny HUD when active
+  if (!on) return null;
+
+  const secs = Math.ceil(remaining / 1000);
 
   return (
-    <style>{`
-      * { transition: none !important; }
-      body { background: repeating-linear-gradient(0deg,#fff, #fff 2px,#f1f5f9 2px, #f1f5f9 4px); }
-      .card { border: 3px double #111 !important; border-radius: 0 !important; }
-      .btn, .btn-primary { transform: skewX(-6deg); font-family: "Comic Sans MS", system-ui; }
-      a:hover { text-decoration: underline wavy; }
-    `}</style>
+    <div
+      aria-live="polite"
+      className="fixed bottom-3 left-1/2 -translate-x-1/2 z-[80] pointer-events-none"
+    >
+      <div className="pointer-events-auto rounded-full bg-black/80 text-white text-xs px-3 py-1 shadow-md border border-white/20">
+        CRT mode engaged • auto-off in {secs}s
+      </div>
+    </div>
   );
 }
