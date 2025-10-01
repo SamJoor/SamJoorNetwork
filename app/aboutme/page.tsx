@@ -22,14 +22,14 @@ export default function AboutPage() {
             SJ
           </div>
           <div>
-            <h2 className="text-xl font-semibold">Sam Joor</h2>
+            <h2 className="text-xl font-semibold">Sam Joor ---</h2>
             <p className="text-zinc-600">
               Full-Stack Developer • Data Science • Cybersecurity
             </p>
             <p className="mt-3 text-zinc-700 leading-relaxed">
-              I enjoy building things that feel thoughtful and thourough. Recently I’ve been staying on track with my studies and getting the most out of college. 
-              In my free time, I have had a lot of fun building web apps with Next.js + Tailwind and tinkering with security automation inside my VM. 
-              When my face isnt glued to a screen, Im out on campus either in classes, with my fraternity or shooting hoops with my friends.
+              Hey im Sam, I enjoy building things that feel thoughtful and thourough. Recently I’ve been keeping up with classes and getting the most out of college. 
+              In my free time, I have had a lot of fun building web apps with Next.js+Tailwind and tinkering with security automation inside my VM. 
+              When my face isnt glued to a screen, Im out on campus either in classes, at the gym, with my fraternity or hooping with friends.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {["JavaScript", "Python", "PowerShell"].map((t) => (
@@ -81,7 +81,7 @@ export default function AboutPage() {
             <a href="https://www.linkedin.com/in/samjoor/" target="_blank" rel="noopener noreferrer" className="btn">LinkedIn</a>
           </div>
           <p className="mt-3 text-xs text-zinc-500">
-            Prefer DM? Replace these links later with your actual contact preferences.
+            .-. . - .-.
           </p>
         </section>
       </div>

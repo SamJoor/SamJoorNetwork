@@ -46,3 +46,31 @@
 
 /* Focus outlines for keyboard users (used by TopNav buttons/links) */
 :focus-visible { outline: none; }
+/* Retro mode toggle via <html class="retro"> */
+html.retro body {
+  image-rendering: pixelated;
+  filter: contrast(1.06) saturate(1.08);
+}
+
+/* Subtle CRT border on your cards/components */
+html.retro .card {
+  box-shadow: 0 0 0 1px #0ff, 0 0 0 2px #f0f, 0 0 0 3px #0ff;
+}
+
+/* Scanlines overlay (respects reduced motion) */
+@media (prefers-reduced-motion: no-preference) {
+  html.retro body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.08),
+      rgba(0, 0, 0, 0.08) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode: multiply;
+  }
+}
