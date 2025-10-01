@@ -136,7 +136,10 @@ export default function DevLinkd() {
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, X, User, Code2 as CodeIcon } from "lucide-react";
+import { Egg as EggIcon, Menu, X, User, Code2 as CodeIcon } from "lucide-react";
+
+// adjust the path if this file isn't in app/components/
+import ClickyLogo from "./ClickyLogo";
 
 function TopNav() {
   const [open, setOpen] = useState(false);
@@ -168,7 +171,10 @@ function TopNav() {
       <div className="container-page h-14 flex items-center justify-between gap-2">
         {/* Logo + site name */}
         <div className="flex items-center gap-2 min-w-0">
-          <LogoSJ className="h-7 w-7 shrink-0" />
+          {/* Wrap the logo so 5 clicks unlock the egg */}
+          <ClickyLogo>
+            <LogoSJ className="h-7 w-7 shrink-0" />
+          </ClickyLogo>
           <Link href="/" className="font-bold tracking-tight truncate">
             {SITE_NAME}
           </Link>
@@ -176,6 +182,7 @@ function TopNav() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
+          <NavLink href="/egg-hunt" label="Egg Hunt" icon={EggIcon} />
           <NavLink href="/" label="Home" icon={User} />
           <NavLink href="/projects" label="Projects" icon={CodeIcon} />
           <NavLink href="/aboutme" label="About me" icon={User} />
@@ -218,20 +225,21 @@ function TopNav() {
           className="md:hidden z-[60] border-t border-zinc-200 bg-white/95 backdrop-blur-sm"
         >
           <div className="container-page py-3 flex flex-col gap-2">
-            {/* Internal links — same hover effects for consistency */}
-            <Link href="/" className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2">
+            <Link href="/egg-hunt" className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2">
+              Egg Hunt
+            </Link>
+            <Link href="/" className="btn transform transition duration-200 ease-out hover:scale-110 hover:rotate-2">
               Home
             </Link>
-            <Link href="/projects" className="btn transform transition duration-200 ease-out hover:scale-110 hover:rotate-2">
+            <Link href="/projects" className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2">
               Projects
             </Link>
-            <Link href="/aboutme" className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2">
+            <Link href="/aboutme" className="btn transform transition duration-200 ease-out hover:scale-110 hover:rotate-2">
               About me
             </Link>
 
             <div className="mt-2 h-px bg-zinc-200" />
 
-            {/* Actions on mobile (same vibe) */}
             <a
               href="/SamJoorResume.pdf"
               download
@@ -270,7 +278,6 @@ function NavLink({
     </Link>
   );
 }
-
 /* ---------- Left Column ---------- */
 function ProfileCard() {
   return (
@@ -506,10 +513,10 @@ function Footer() {
 }
 
 /* ---------- Logo ---------- */
-function LogoSJ({ className = "h-7 w-7" }: { className?: string }) {
+export function LogoSJ({ className = "h-7 w-7" }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" className={className} xmlns="http://www.w3.org/2000/svg">
-      <rect width="64" height="64" rx="12" fill="#2563EB"/>
+      <rect width="64" height="64" rx="12" fill="#2563EB" />
       {/* S curve */}
       <path
         d="M42 20c-3-3-7-4-11-4-6 0-11 3-11 8 0 9 18 6 18 13 0 4-4 6-9 6-4 0-8-1-11-4"
