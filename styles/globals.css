@@ -2,13 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base polish */
+/* ---------------- Base polish ---------------- */
 @layer base {
   html { scroll-behavior: smooth; }
   body { @apply bg-zinc-100 text-zinc-900 antialiased; }
+
+  /* Better text selection */
+  ::selection { background: #dbeafe; color: #0f172a; }
 }
 
-/* Reusable helpers */
+/* ---------------- Reusable helpers ---------------- */
 @layer components {
   .container-page {
     @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
@@ -29,3 +32,17 @@
     @apply flex items-center gap-2 text-sm font-semibold text-zinc-700;
   }
 }
+
+/* ---------------- Tiny animations & a11y polish ---------------- */
+
+/* “Clicky logo” slow spin (used by Easter egg) */
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.animate-spin-slow { animation: spin-slow 1.2s ease-in-out; }
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+}
+
+/* Focus outlines for keyboard users (used by TopNav buttons/links) */
+:focus-visible { outline: none; }
