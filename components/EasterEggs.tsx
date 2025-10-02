@@ -136,10 +136,6 @@ export default function EasterEggs() {
       if (letterTimer) window.clearTimeout(letterTimer);
     };
   }, []);
-
-  /** ------------------------------------------------------
-   *  4) OPTIONAL: ?retro=1 also enables Retro for 60 seconds
-   *  ------------------------------------------------------ */
   useEffect(() => {
     try {
       const url = new URL(window.location.href);

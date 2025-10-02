@@ -59,8 +59,8 @@ const featuredProject = {
     "Centralized log collection"
   ],
   links: [
-    { label: "Repo", href: "https://github.com/your/repo" },
-    { label: "Live", href: "https://your-live-site.com" },
+    { label: "", href: "#" },
+    { label: "", href: "#" },
   ],
   progress: 30, 
   status: "Debugging automation errors", 
