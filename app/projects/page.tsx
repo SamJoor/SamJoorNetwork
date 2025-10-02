@@ -7,37 +7,29 @@ export const metadata = { title: "Projects — SamJoorNetwork" };
 // It does NOT affect your Home page.
 const projects = [
   {
-    title: "ABSTRXT — Animated Portfolio + Store",
-    role: "Next.js • Tailwind • Framer Motion",
+    title: "Store Page",
     date: "2025",
     blurb:
-      "Interactive, blob-driven navbar with password gate, SVG logo pieces as motion components, and Vercel deploy.",
+      "This is for my brand so its under lock and key while I get my trademark. It inlcudes a password page, SVG logo with motion, interactive store visuals.",
     tags: ["Next.js", "Tailwind", "Framer Motion", "TypeScript"],
     links: [
-      { label: "Repo", href: "#" },
-      { label: "Live", href: "#" },
+      { label: "Repo coming soon", href: "#" },
     ],
   },
   {
-    title: "Win Sandbox Orchestrator",
-    role: "PowerShell • VirtualBox • Sysmon/Procmon",
+    title: "Automated Windows Sandbox ",
     date: "2025",
     blurb:
       "One-command malware detonation lab: start VM, run task, collect logs, archive artifacts to host.",
     tags: ["PowerShell", "VirtualBox", "Automation", "Security"],
-    links: [{ label: "Docs", href: "#" }],
-  },
-  {
-    title: "Solana Analytics Mini-Site",
-    role: "Next.js • RPC • Charts",
-    date: "2025",
-    blurb:
-      "Token dashboard with price, volume, holders, whale alerts, and wallet drill-downs.",
-    tags: ["Next.js", "Charting", "ETL", "Solana"],
-    links: [
-      { label: "Repo", href: "#" },
-      { label: "Live", href: "#" },
-    ],
+    links: [{ label: "WIP", href: "#" }],
+    },
+    {
+      title: "Portfolio Website",
+      date: "2025",
+      blurb: "Fun interactive way for me to dsiplay my expertise and enjoyment for coding and cybersecuirty",
+      tags: ["Next.js", "Tailwind", "Vercel", "Git", "SQL", "Love", "/api", "/coffee"],
+      links: [{ label: "You're already here!", href: "#" }],
   },
 ];
 
@@ -54,7 +46,6 @@ export default function ProjectsPage() {
           <div key={i} className="card p-4 flex flex-col">
             <div className="text-sm text-zinc-500">{p.date}</div>
             <h2 className="text-lg font-semibold mt-1">{p.title}</h2>
-            <div className="text-sm text-zinc-600">{p.role}</div>
             <p className="text-sm text-zinc-700 mt-3 leading-relaxed">{p.blurb}</p>
 
             <div className="mt-3 flex flex-wrap gap-2">

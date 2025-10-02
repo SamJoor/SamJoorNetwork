@@ -6,9 +6,9 @@ export type Egg = {
 };
 
 export const EGGS: Egg[] = [
-  { id: "konami",      label: "The Lost Sequence",   description: "Going rapidly a daring individual undertook spaceflight" },
-  { id: "clicky-logo", label: "Break the seal",   description: "When the fifth seal broke, silence swept the heavens." },
-  { id: "samjoor",     label: "pentagon Cipher",     description: "A five-sided guardian keeps its secrets well. 16th-century courtiers knew the method; the key is the fortress of power. Just in case, hezcouf knows the answer" },
-  { id: "retro",       label: "OG Mimicry",    description: "I live in silence and in pause, no lips no ink and yet I speak" },
-  { id: "coffee",      label: "coming soon",  description: "" },
+  { id: "Null",      label: "Null cheat",   description: "Going rapidly a daring individual undertook spaceflight" },
+  { id: "Seal", label: "Seal breaker",   description: "5 hits to win" },
+  { id: "pentagon",     label: "pentagon Cipher",     description: "16th-century courtiers knew the method and hezcouf knows the answer" },
+  { id: "Code", label: "Code",    description: "I live in silence and in pause, no lips no ink and yet I speak. I bet you wish you knew more about me." },
+  { id: "+/^",      label: "+/^",  description: "This is the last one, I hope you enjoyed my project!" },
 ];

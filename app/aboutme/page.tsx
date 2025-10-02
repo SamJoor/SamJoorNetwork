@@ -19,10 +19,10 @@ export default function AboutPage() {
       <section className="card p-6">
         <div className="flex items-start gap-4">
           <div className="size-16 md:size-20 rounded-xl bg-zinc-200 flex items-center justify-center text-lg md:text-2xl font-bold text-zinc-700">
-            SJ
+            SJ 
           </div>
           <div>
-            <h2 className="text-xl font-semibold">Sam Joor ---</h2>
+            <h2 className="text-xl font-semibold">Sam Joor </h2>
             <p className="text-zinc-600">
               Full-Stack Developer • Data Science • Cybersecurity
             </p>
@@ -81,7 +81,7 @@ export default function AboutPage() {
             <a href="https://www.linkedin.com/in/samjoor/" target="_blank" rel="noopener noreferrer" className="btn">LinkedIn</a>
           </div>
           <p className="mt-3 text-xs text-zinc-500">
-            .-. . - .-.
+            72 65 74 72 6F
           </p>
         </section>
       </div>
