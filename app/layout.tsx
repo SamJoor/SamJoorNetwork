@@ -1,14 +1,4 @@
-// app/layout.tsx
 import "../styles/globals.css";
-
-import EasterEggs from "../components/EasterEggs";
-import SecretModal from "../components/SecretModal";
-import RetroStyle from "../components/RetroStyle";
-import LeaderboardPrompt from "../components/LeaderboardPrompt";
-
-export const viewport = {
-  themeColor: "#ffffff",
-};
 
 export const metadata = {
   title: "SamJoorNetwork",
@@ -26,13 +16,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-screen">
-        {/* Easter egg features (always available) */}
-        <RetroStyle />
-        <EasterEggs />
-        <SecretModal />
-        <LeaderboardPrompt />
+        {/* Global overlays that don't need props can stay here */}
+        {/* <RetroStyle /> */}
+        {/* <EasterEggs /> */}
+        {/* <SecretModal /> */}
 
-        {/* Actual page content */}
+        {/* Do NOT render <LeaderboardPrompt /> here. */}
         {children}
       </body>
     </html>
