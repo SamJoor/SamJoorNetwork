@@ -27,12 +27,13 @@ export default function AboutPage() {
               Full-Stack Developer • Data Science • Cybersecurity
             </p>
             <p className="mt-3 text-zinc-700 leading-relaxed">
-              Hey im Sam, I enjoy building things that feel thoughtful and thourough. Recently I’ve been keeping up with classes and getting the most out of college. 
-              In my free time, I have had a lot of fun building web apps with Next.js+Tailwind and tinkering with security automation inside my VM. 
+              Hey im Sam, Im a 3rd year at Quinnipiac University expected to graduate this spring with a Batchelors in Data Science and two minors in Economics and Computer Science.
+              After that ill continue working towards my masters in Cybersecurity which I am on track to acheive in 2027.             
+              I enjoy learning about anything tech and recently I’ve had a lot of fun building web apps with Next.js+Tailwind and tinkering with automation inside my VM. 
               When my face isnt glued to a screen, Im out on campus either in classes, at the gym, with my fraternity or hooping with friends.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {["JavaScript", "Python", "PowerShell"].map((t) => (
+              {["JavaScript", "Python", "R", "SQL", "JSON", "SQL", "Javascript", "HTML"].map((t) => (
                 <span key={t} className="pill">{t}</span>
               ))}
             </div>
