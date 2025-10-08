@@ -1,52 +1,69 @@
+// app/enter/page.tsx
 "use client";
+export const dynamic = "force-dynamic"; // avoid prerender/export issues
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function EnterPage() {
   const [pw, setPw] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const sp = useSearchParams();
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
   const router = useRouter();
-  const next = sp.get("next") || "/";
+  const qs = useSearchParams();
+  const redirect = qs.get("redirect") || "/";
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
-    const res = await fetch("/api/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: pw }),
-    });
-    if (res.ok) {
-      router.replace(next);
-    } else {
-      const j = await res.json().catch(() => ({}));
-      setError(j?.message || "Invalid password");
+    setErr("");
+    setBusy(true);
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ password: pw }),
+      });
+      if (res.ok) {
+        router.push(redirect);
+      } else {
+        setErr("Wrong password, plz no hack.");
+      }
+    } catch {
+      setErr("Something went wrong. Try again.");
+    } finally {
+      setBusy(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-100 p-6">
-      <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+    <div className="min-h-screen grid place-items-center p-6">
+      <form
+        onSubmit={onSubmit}
+        className="rounded-2xl border border-zinc-200 bg-white w-full max-w-sm p-6 shadow-sm"
+      >
         <h1 className="text-xl font-semibold">Welcome!</h1>
-        <p className="mt-2 text-sm text-zinc-600">
-          This site is private. Please enter the password to access.
+        <p className="text-sm text-zinc-600 mt-1">
+          This is a private site please enter a password to access.
         </p>
 
-        <form onSubmit={onSubmit} className="mt-4 space-y-3">
-          <input
-            type="password"
-            value={pw}
-            onChange={(e) => setPw(e.target.value)}
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2"
-            placeholder="Password"
-            autoFocus
-          />
-          {error && <div className="text-sm text-red-600">{error}</div>}
-          <button className="btn-primary w-full justify-center">Unlock</button>
-        </form>
-        </div>
+        <input
+          type="password"
+          value={pw}
+          onChange={(e) => setPw(e.target.value)}
+          placeholder="Password"
+          className="mt-4 w-full border border-zinc-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-300"
+          autoFocus
+        />
+        {err ? <p className="text-red-600 text-sm mt-2">{err}</p> : null}
+
+        <button
+          type="submit"
+          disabled={busy || !pw}
+          className="mt-4 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-full text-sm font-medium bg-blue-600 text-white disabled:opacity-60"
+        >
+          {busy ? "Checking…" : "Continue"}
+        </button>
+      </form>
     </div>
   );
 }
