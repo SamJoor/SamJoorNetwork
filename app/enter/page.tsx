@@ -24,7 +24,7 @@ function EnterForm() {
         body: JSON.stringify({ password: pw }),
       });
       if (res.ok) router.push(redirect);
-      else setErr("Wrong password.");
+      else setErr("Wrong Password, plz no hack ty");
     } catch {
       setErr("Something went wrong.");
     } finally {
