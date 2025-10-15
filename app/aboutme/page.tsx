@@ -47,7 +47,7 @@ export default function AboutPage() {
         <section className="card p-6">
           <h3 className="text-sm font-semibold text-zinc-700">What I’m doing</h3>
           <ul className="mt-3 list-disc list-inside text-sm text-zinc-700 space-y-2">
-            <li>Polishing <strong>SamJoorNetwork</strong> and using it to test fun new features whenever im bored!</li>
+            <li>Polishing <strong>SamJoorNetwork</strong> and using it to have fun whenever im bored!</li>
             <li>Learning about anything I find fun or interesting, recently thats been automation, security workflows, and scripts.</li>
             <li>Working towards my bachelors in data science and graduating this spring!!.</li>
           </ul>
@@ -59,15 +59,15 @@ export default function AboutPage() {
           <ul className="mt-3 text-sm text-zinc-700 space-y-3">
             <li>
               <div className="font-medium">Full-Stack Projects</div>
-              <div className="text-zinc-600">Next.js, </div>
+              <div className="text-zinc-600">SamJoor.com, abstrkt.store, StockAnalyzer </div>
             </li>
             <li>
-              <div className="font-medium">Data / Analytics</div>
-              <div className="text-zinc-600">ETL scripts, CSV/JSON pipelines, charting</div>
+              <div className="font-medium">Data Science</div>
+              <div className="text-zinc-600">Python, R, Data modeling</div>
             </li>
             <li>
-              <div className="font-medium">Cyber tinkerer</div>
-              <div className="text-zinc-600">Sandboxing, VM automation</div>
+              <div className="font-medium">Cybersecurity</div>
+              <div className="text-zinc-600">VMs, Wireshark, Terminal</div>
             </li>
           </ul>
         </section>
