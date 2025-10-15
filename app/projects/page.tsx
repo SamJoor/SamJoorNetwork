@@ -31,7 +31,16 @@ const projects = [
       tags: ["Next.js", "Tailwind", "Vercel", "Git", "SQL", "Love", "/api", "/coffee"],
       links: [{ label: "You're already here!", href: "#" }],
   },
-];
+  {
+      title: "Stock Analyzer",
+      date: "2025",
+      blurb: "A stock analysis dashboard that utilizes an LLM, Python, React and APIs to analyze stocks and provide buy/hold/sell recommendations",
+      tags: ["Next.js", "Python", "APIs", "Git", "SQL", "LLM", "Machine Learning",],
+      links: [{ label: "School project taken too far", href: "#" }],
+  },
+  ];
+
+
 
 export default function ProjectsPage() {
   return (
