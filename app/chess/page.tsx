@@ -459,7 +459,7 @@ export default function ChessPage() {
       <div className="space-y-4">
         <input
           className="border p-2 w-full"
-          placeholder="Username"
+          placeholder="First + last name"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
