@@ -15,7 +15,8 @@ export default function ChessPage() {
   const game = useMemo(() => new Chess(), []);
   const [fen, setFen] = useState(game.fen());
   const [thinking, setThinking] = useState(false);
-
+  
+  const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
   const [checkSquares, setCheckSquares] = useState<Record<string, any>>({});
   const [lastMoveSquares, setLastMoveSquares] = useState<Record<string, any>>({});
   const [username, setUsername] = useState("");
@@ -84,20 +85,24 @@ export default function ChessPage() {
   /* ---------------- Leaderboard ---------------- */
 
   async function loadLeaderboard() {
-    const res = await fetch("/api/chess/leaderboard");
+  try {
+    setLeaderboardError(null);
+
+    const res = await fetch("/api/chess/leaderboard", { cache: "no-store" });
     const data = await res.json();
+
+    if (!res.ok) {
+      setLeaderboard([]);
+      setLeaderboardError(data?.error || "Failed to load leaderboard");
+      return;
+    }
+
     setLeaderboard(data.top || []);
+  } catch (e: any) {
+    setLeaderboard([]);
+    setLeaderboardError(e?.message || "Failed to load leaderboard");
   }
-
-  useEffect(() => {
-    loadLeaderboard();
-    const saved = localStorage.getItem("chess_username");
-    if (saved) setUsername(saved);
-  }, []);
-
-  useEffect(() => {
-    if (username) localStorage.setItem("chess_username", username);
-  }, [username]);
+}
 
   /* ---------------- Learned (Supabase book) ---------------- */
 
@@ -475,17 +480,51 @@ export default function ChessPage() {
           )}
         </div>
 
-        <div className="border rounded p-3">
-          <h3 className="font-bold mb-2">Leaderboard</h3>
-          <ol className="text-sm space-y-1">
-            {leaderboard.map((p, i) => (
-              <li key={p.username}>
-                {i + 1}. {p.username} — {p.elo}
-              </li>
-            ))}
-          </ol>
+        {/* LEADERBOARD */}
+<div className="border rounded p-3">
+  <div className="flex items-center justify-between mb-2">
+    <h3 className="font-bold">Leaderboard</h3>
+    <button
+      className="text-xs border px-2 py-1 rounded hover:bg-gray-100 transition"
+      onClick={loadLeaderboard}
+      type="button"
+    >
+      Refresh
+    </button>
+  </div>
+
+  <ol className="text-sm space-y-2">
+    {leaderboard.map((p, i) => (
+      <li
+        key={p.username}
+        className="flex items-center justify-between gap-3"
+      >
+      {leaderboardError && (
+  <div className="mt-2 text-xs text-red-600">
+    {leaderboardError}
+  </div>
+)}
+        <div className="truncate">
+          <span className="font-medium">
+            {i + 1}. {p.username}
+          </span>{" "}
+          <span className="text-zinc-600">— {p.elo}</span>
         </div>
+
+        <div className="text-xs text-zinc-700 whitespace-nowrap">
+          <span className="font-semibold">W</span> {p.wins ?? 0}{" "}
+          <span className="font-semibold">L</span> {p.losses ?? 0}{" "}
+          <span className="font-semibold">T</span> {p.draws ?? 0}
+        </div>
+      </li>
+    ))}
+
+    {leaderboard.length === 0 && (
+      <li className="text-zinc-500 text-xs">No games recorded yet.</li>
+    )}
+  </ol>
+</div>
       </div>
-    </div>
+    </div>  
   );
 }
