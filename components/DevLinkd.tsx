@@ -1,5 +1,6 @@
 'use client';
 
+import Link from "next/link";
 import ProjectCard from "@/components/ProjectCard";
 import React from "react";
 import { motion } from "framer-motion";
@@ -30,7 +31,7 @@ const profile = {
   location: "Boston, MA",
   avatarInitials: "SJ",
   about:
-    "I love learning especially when its cybersecurity/computer related... 💻🤓💻",
+    "I love learning especially when its cybersecurity/computer related...🤓",
   badges: [
     { icon: Apple, label: "Student" },
     { icon: Briefcase, label: "Unemployed" },
@@ -63,7 +64,7 @@ const featuredProject = {
     { label: "", href: "#" },
   ],
   progress: 30, 
-  status: "Debugging automation errors", 
+  status: "Working through automation errors", 
 };
 
 /* ---------- Reusable UI ---------- */
@@ -133,7 +134,6 @@ export default function DevLinkd() {
 }
 
 /* ---------- Top Navigation ---------- */
-import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { Egg as EggIcon, Menu, X, User, Code2 as CodeIcon } from "lucide-react";
@@ -186,6 +186,7 @@ function TopNav() {
           <NavLink href="/" label="Home" icon={User} />
           <NavLink href="/projects" label="Projects" icon={CodeIcon} />
           <NavLink href="/aboutme" label="About me" icon={User} />
+          <NavLink href="/chess" label="Chess" icon={CodeIcon} />
         </nav>
 
         {/* Desktop actions (with playful hover) */}
@@ -237,7 +238,9 @@ function TopNav() {
             <Link href="/aboutme" className="btn transform transition duration-200 ease-out hover:scale-110 hover:rotate-2">
               About me
             </Link>
-
+            <Link href="/chess" className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2">
+              Chess
+            </Link>
             <div className="mt-2 h-px bg-zinc-200" />
 
             <a
@@ -302,7 +305,7 @@ function ProfileCard() {
         </div>
         <div className="flex-1">
           <div className="flex flex-wrap gap-2">
-            <Pill>Looking For Work👨‍💻💼🙏</Pill>
+            <Pill>Looking For Work💼</Pill>
           </div>
         </div>
       </div>
@@ -343,20 +346,18 @@ function IntroPost() {
         </div>
       </div>
       <div className="mt-3 text-sm leading-relaxed">
-        Hey everyone 👋, I turned my resume into a LinkedIn-style feed to list my
-        projects and introduce myself in a way that hopefully feels a little more 
-        engaging then reading a piece of paper 😄.
-      </div>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {"JavaScript Typescript Next.js Tailwind Framer Motion Python SQL PowerShell"
-          .split(" ")
-          .map((t) => (
-            <Pill key={t}>{t}</Pill>
-          ))}
+        Hey, Everyone. I made this website to list my projects and
+        introduce myself in a way that, hopefully, feels more 
+        engaging than reading a piece of paper. There are a bunch 
+        of little surprises, like an egg hunt and a chess minigame.
+        I plan on adding more fun stuff in the future. 
+        Feel free to connect with me! 
+        - Sam Joor
       </div>
     </Card>
   );
 }
+
 
 function ProgressBar({
   value,
@@ -396,7 +397,7 @@ function ProjectsFeed() {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">
-        ⬇️ ✨My favorite project at the moment✨ ⬇️
+        My favorite project at the moment
       </h2>
 
       <Card className="p-4">

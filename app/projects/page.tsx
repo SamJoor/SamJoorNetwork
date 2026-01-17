@@ -7,13 +7,23 @@ export const metadata = { title: "Projects — SamJoorNetwork" };
 // It does NOT affect your Home page.
 const projects = [
   {
+    title: "Chess Minigame",
+    date: "2026",
+    blurb:
+      "Fully functional chess game with an AI opponent and a leaderboard.",
+    tags: ["Next.js", "Chess.js", "AI", "Supabase"],
+    links: [
+      { label: "Github", href: "https://github.com/SamJoor/SamJoorNetwork" },
+    ],
+  },
+  {
     title: "Store Page",
     date: "2025",
     blurb:
-      "This is for my brand so its under lock and key while I get my trademark. It inlcudes a password page, SVG logo with motion, interactive store visuals.",
+      "This is for my brand, it inlcudes a password page, SVG logo with motion, interactive store visuals.",
     tags: ["Next.js", "Tailwind", "Framer Motion", "TypeScript"],
     links: [
-      { label: "Repo coming soon", href: "#" },
+      { label: "Github", href: "https://github.com/SamJoor/Webby" },
     ],
   },
   {
@@ -29,14 +39,14 @@ const projects = [
       date: "2025",
       blurb: "Fun interactive way for me to dsiplay my expertise and enjoyment for coding and cybersecuirty",
       tags: ["Next.js", "Tailwind", "Vercel", "Git", "SQL", "Love", "/api", "/coffee"],
-      links: [{ label: "You're already here!", href: "#" }],
+      links: [{ label: "Github", href: "https://github.com/SamJoor/SamJoorNetwork" }],
   },
   {
       title: "Stock Analyzer",
       date: "2025",
       blurb: "A stock analysis dashboard that utilizes an LLM, Python, React and APIs to analyze stocks and provide buy/hold/sell recommendations",
       tags: ["Next.js", "Python", "APIs", "Git", "SQL", "LLM", "Machine Learning",],
-      links: [{ label: "School project taken too far", href: "#" }],
+      links: [{ label: "Github", href: "https://github.com/SamJoor/StocksAdvisory" }],
   },
   ];
 
