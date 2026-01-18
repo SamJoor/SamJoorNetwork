@@ -1,74 +1,86 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/server/supabase";
 
+export const dynamic = "force-dynamic";
+
 type Body = {
   username: string;
   winner: "w" | "b" | "draw";
   playerColor: "w" | "b";
-  difficulty: "easy" | "medium" | "hard";
-  aiMoves: { positionFen: string; uci: string }[];
+  difficulty?: "easy" | "medium" | "hard";
 };
 
-function positionKey(fen: string) {
-  return fen.split(" ").slice(0, 4).join(" ");
+function clampElo(v: number) {
+  return Math.max(100, Math.round(v));
+}
+
+function kFactor(difficulty?: Body["difficulty"]) {
+  // optional: harder bots move rating more (feel free to tweak)
+  if (difficulty === "easy") return 16;
+  if (difficulty === "hard") return 40;
+  return 32;
 }
 
 export async function POST(req: Request) {
   const body = (await req.json()) as Body;
-  const username = body.username?.trim();
 
+  const username = (body.username ?? "").trim();
   if (!username) {
-    return NextResponse.json({ ok: false }, { status: 400 });
+    return NextResponse.json({ error: "Username required" }, { status: 400 });
   }
 
-  const score =
-    body.winner === "draw"
-      ? 0.5
-      : body.winner === body.playerColor
-      ? 1
-      : 0;
+  const { winner, playerColor, difficulty } = body;
 
-  const { data: player } = await supabaseAdmin
+  // Player outcome
+  const isDraw = winner === "draw";
+  const isWin = !isDraw && winner === playerColor;
+  const isLoss = !isDraw && !isWin;
+
+  // Load existing stats (if any)
+  const { data: existing, error: selErr } = await supabaseAdmin
     .from("chess_players")
-    .select("*")
+    .select("username, elo, wins, losses, draws")
     .eq("username", username)
     .maybeSingle();
 
-  const elo = player?.elo ?? 800;
-  const aiElo = body.difficulty === "easy" ? 800 : body.difficulty === "medium" ? 1200 : 1600;
-  const expected = 1 / (1 + 10 ** ((aiElo - elo) / 400));
-  const newElo = Math.round(elo + 32 * (score - expected));
-
-  await supabaseAdmin.from("chess_players").upsert({
-    username,
-    elo: newElo,
-    wins: (player?.wins ?? 0) + (score === 1 ? 1 : 0),
-    draws: (player?.draws ?? 0) + (score === 0.5 ? 1 : 0),
-    losses: (player?.losses ?? 0) + (score === 0 ? 1 : 0),
-    updated_at: new Date().toISOString(),
-  });
-
-  const aiScore = score === 0.5 ? 0.5 : 1 - score;
-
-  for (const m of body.aiMoves) {
-    const key = positionKey(m.positionFen);
-
-    const { data: row } = await supabaseAdmin
-      .from("chess_learned_moves")
-      .select("*")
-      .eq("position_key", key)
-      .eq("uci", m.uci)
-      .maybeSingle();
-
-    await supabaseAdmin.from("chess_learned_moves").upsert({
-      position_key: key,
-      uci: m.uci,
-      plays: (row?.plays ?? 0) + 1,
-      wins: (row?.wins ?? 0) + (aiScore === 1 ? 1 : 0),
-      draws: (row?.draws ?? 0) + (aiScore === 0.5 ? 1 : 0),
-      losses: (row?.losses ?? 0) + (aiScore === 0 ? 1 : 0),
-    });
+  if (selErr) {
+    console.error("select chess_players error:", selErr);
+    return NextResponse.json({ error: selErr.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, elo: newElo });
+  const currentElo = existing?.elo ?? 800;
+
+  // Elo vs fixed bot rating (simple, stable)
+  const botElo = 900;
+  const expected = 1 / (1 + Math.pow(10, (botElo - currentElo) / 400));
+  const score = isWin ? 1 : isDraw ? 0.5 : 0;
+
+  const K = kFactor(difficulty);
+  const nextElo = clampElo(currentElo + K * (score - expected));
+
+  const nextWins = (existing?.wins ?? 0) + (isWin ? 1 : 0);
+  const nextLosses = (existing?.losses ?? 0) + (isLoss ? 1 : 0);
+  const nextDraws = (existing?.draws ?? 0) + (isDraw ? 1 : 0);
+
+  // Upsert ensures: "if played before, update same row"
+  const { error: upErr } = await supabaseAdmin
+    .from("chess_players")
+    .upsert(
+      {
+        username,
+        elo: nextElo,
+        wins: nextWins,
+        losses: nextLosses,
+        draws: nextDraws,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "username" }
+    );
+
+  if (upErr) {
+    console.error("upsert chess_players error:", upErr);
+    return NextResponse.json({ error: upErr.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true, elo: nextElo });
 }
