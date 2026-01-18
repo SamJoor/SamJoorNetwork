@@ -15,8 +15,10 @@ export default function ChessPage() {
   const game = useMemo(() => new Chess(), []);
   const [fen, setFen] = useState(game.fen());
   const [thinking, setThinking] = useState(false);
-  
+
   const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
+  const [lbLoading, setLbLoading] = useState(false);
+
   const [checkSquares, setCheckSquares] = useState<Record<string, any>>({});
   const [lastMoveSquares, setLastMoveSquares] = useState<Record<string, any>>({});
   const [username, setUsername] = useState("");
@@ -85,24 +87,55 @@ export default function ChessPage() {
   /* ---------------- Leaderboard ---------------- */
 
   async function loadLeaderboard() {
-  try {
-    setLeaderboardError(null);
+    try {
+      setLbLoading(true);
+      setLeaderboardError(null);
 
-    const res = await fetch("/api/chess/leaderboard", { cache: "no-store" });
-    const data = await res.json();
+      const res = await fetch("/api/chess/leaderboard", { cache: "no-store" });
+      const data = await res.json();
 
-    if (!res.ok) {
+      if (!res.ok) {
+        setLeaderboard([]);
+        setLeaderboardError(data?.error || "Failed to load leaderboard");
+        return;
+      }
+
+      setLeaderboard(data.top || []);
+    } catch (e: any) {
       setLeaderboard([]);
-      setLeaderboardError(data?.error || "Failed to load leaderboard");
-      return;
+      setLeaderboardError(e?.message || "Failed to load leaderboard");
+    } finally {
+      setLbLoading(false);
     }
-
-    setLeaderboard(data.top || []);
-  } catch (e: any) {
-    setLeaderboard([]);
-    setLeaderboardError(e?.message || "Failed to load leaderboard");
   }
-}
+
+  // Load leaderboard + username on mount (and retry once so users don't need to click Refresh)
+  useEffect(() => {
+    let cancelled = false;
+
+    const saved = localStorage.getItem("chess_username");
+    if (saved) setUsername(saved);
+
+    (async () => {
+      await loadLeaderboard();
+
+      // Retry once after a short delay (fixes "only appears after refresh")
+      if (!cancelled) {
+        setTimeout(() => {
+          if (!cancelled) loadLeaderboard();
+        }, 400);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (username) localStorage.setItem("chess_username", username);
+  }, [username]);
 
   /* ---------------- Learned (Supabase book) ---------------- */
 
@@ -338,18 +371,24 @@ export default function ChessPage() {
 
   /* ---------------- End Game / Learning ---------------- */
 
-  async function finishGame() {
-    let winner: "w" | "b" | "draw" = "draw";
-    let outcome: Result = "draw";
+ async function finishGame() {
+  let winner: "w" | "b" | "draw" = "draw";
+  let outcome: Result = "draw";
 
-    if (game.isCheckmate()) {
-      winner = game.turn() === "w" ? "b" : "w";
-      outcome = winner === "w" ? "win" : "loss";
-    } else {
-      outcome = "draw";
-    }
+  if (game.isCheckmate()) {
+    winner = game.turn() === "w" ? "b" : "w";
+    outcome = winner === "w" ? "win" : "loss";
+  } else {
+    outcome = "draw";
+  }
 
-    // rating update
+  // ✅ Show end screen instantly
+  setResult(outcome);
+  setGameOver(true);
+  setThinking(false);
+
+  // ✅ Fire-and-forget backend updates (don’t block UI)
+  try {
     const res = await fetch("/api/chess/result", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -364,8 +403,11 @@ export default function ChessPage() {
 
     const data = await res.json();
     setEloChange(data.elo ?? null);
+  } catch (e) {
+    console.error("result update failed", e);
+  }
 
-    // learning update (wins/draws/losses)
+  try {
     await fetch("/api/chess/log", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -374,11 +416,15 @@ export default function ChessPage() {
         moves: aiMoves.current,
       }),
     });
-
-    setResult(outcome);
-    setGameOver(true);
-    loadLeaderboard();
+  } catch (e) {
+    console.error("log update failed", e);
   }
+
+  // Refresh leaderboard after backend commits
+  setTimeout(() => {
+    loadLeaderboard();
+  }, 250);
+}
 
   function resetGame() {
     game.reset();
@@ -399,13 +445,13 @@ export default function ChessPage() {
     <div className="p-6 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
       <div className="md:col-span-2 relative">
         <div className="mb-3">
-  <a
-    href="/"
-    className="inline-block text-sm px-3 py-1 border rounded hover:bg-gray-100 transition"
-  >
-    ← Back 
-  </a>
-</div>
+          <a
+            href="/"
+            className="inline-block text-sm px-3 py-1 border rounded hover:bg-gray-100 transition"
+          >
+            ← Back
+          </a>
+        </div>
 
         <Chessboard
           position={fen}
@@ -476,55 +522,60 @@ export default function ChessPage() {
           </select>
 
           {thinking && !gameOver && (
-            <span className="text-xs font-semibold text-zinc-600 whitespace-nowrap">Thinking…</span>
+            <span className="text-xs font-semibold text-zinc-600 whitespace-nowrap">
+              Thinking…
+            </span>
           )}
         </div>
 
         {/* LEADERBOARD */}
-<div className="border rounded p-3">
-  <div className="flex items-center justify-between mb-2">
-    <h3 className="font-bold">Leaderboard</h3>
-    <button
-      className="text-xs border px-2 py-1 rounded hover:bg-gray-100 transition"
-      onClick={loadLeaderboard}
-      type="button"
-    >
-      Refresh
-    </button>
-  </div>
+        <div className="border rounded p-3">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-bold">Leaderboard</h3>
+            <button
+              className="text-xs border px-2 py-1 rounded hover:bg-gray-100 transition"
+              onClick={loadLeaderboard}
+              type="button"
+            >
+              Refresh
+            </button>
+          </div>
 
-  <ol className="text-sm space-y-2">
-    {leaderboard.map((p, i) => (
-      <li
-        key={p.username}
-        className="flex items-center justify-between gap-3"
-      >
-      {leaderboardError && (
-  <div className="mt-2 text-xs text-red-600">
-    {leaderboardError}
-  </div>
-)}
-        <div className="truncate">
-          <span className="font-medium">
-            {i + 1}. {p.username}
-          </span>{" "}
-          <span className="text-zinc-600">— {p.elo}</span>
+          {lbLoading && (
+            <div className="text-xs text-zinc-500 mb-2">Loading leaderboard…</div>
+          )}
+
+          {leaderboardError && (
+            <div className="mt-2 text-xs text-zinc-600">{leaderboardError}</div>
+          )}
+
+          <ol className="text-sm space-y-2">
+            {leaderboard.map((p, i) => (
+              <li
+                key={p.username}
+                className="flex items-center justify-between gap-3"
+              >
+                <div className="truncate">
+                  <span className="font-medium">
+                    {i + 1}. {p.username}
+                  </span>{" "}
+                  <span className="text-zinc-600">— {p.elo}</span>
+                </div>
+
+                <div className="text-xs text-zinc-700 whitespace-nowrap">
+                  <span className="font-semibold">W</span> {p.wins ?? 0}{" "}
+                  <span className="font-semibold">L</span> {p.losses ?? 0}{" "}
+                  <span className="font-semibold">T</span> {p.draws ?? 0}
+                </div>
+              </li>
+            ))}
+
+            {!lbLoading && leaderboard.length === 0 && !leaderboardError && (
+              <li className="text-zinc-500 text-xs">No games recorded yet.</li>
+            )}
+          </ol>
         </div>
-
-        <div className="text-xs text-zinc-700 whitespace-nowrap">
-          <span className="font-semibold">W</span> {p.wins ?? 0}{" "}
-          <span className="font-semibold">L</span> {p.losses ?? 0}{" "}
-          <span className="font-semibold">T</span> {p.draws ?? 0}
-        </div>
-      </li>
-    ))}
-
-    {leaderboard.length === 0 && (
-      <li className="text-zinc-500 text-xs">No games recorded yet.</li>
-    )}
-  </ol>
-</div>
       </div>
-    </div>  
+    </div>
   );
 }
