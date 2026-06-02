@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/server/supabase";
+import { isFen, isUci, rateLimit, readJson } from "@/lib/server/apiGuards";
 
 function positionKey(fen: string) {
   return fen.split(" ").slice(0, 4).join(" ");
@@ -11,10 +12,20 @@ type Body = {
 };
 
 export async function POST(req: Request) {
-  const body = (await req.json()) as Body;
+  const limited = rateLimit(req, "chess-log", 8, 60_000);
+  if (limited) return limited;
 
-  const moves = body.moves ?? [];
-  const playerOutcome = body.outcome;
+  const body = await readJson<Partial<Body>>(req, 24_576);
+  if (!body || !["win", "loss", "draw"].includes(String(body.outcome))) {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
+
+  const moves = Array.isArray(body.moves)
+    ? body.moves
+        .filter((move) => isFen(move?.positionFen) && isUci(move?.uci))
+        .slice(0, 120)
+    : [];
+  const playerOutcome = body.outcome as Body["outcome"];
 
   // Convert player outcome -> AI outcome (AI is black)
   // player win => AI loss

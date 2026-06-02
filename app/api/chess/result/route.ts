@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/server/supabase";
+import { cleanText, rateLimit, readJson } from "@/lib/server/apiGuards";
 
 export const dynamic = "force-dynamic";
 
@@ -22,14 +23,25 @@ function kFactor(difficulty?: Body["difficulty"]) {
 }
 
 export async function POST(req: Request) {
-  const body = (await req.json()) as Body;
+  const limited = rateLimit(req, "chess-result", 10, 60_000);
+  if (limited) return limited;
 
-  const username = (body.username ?? "").trim();
+  const body = await readJson<Partial<Body>>(req, 4_096);
+  if (!body) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+
+  const username = cleanText(body.username, 40);
   if (!username) {
     return NextResponse.json({ error: "Username required" }, { status: 400 });
   }
 
   const { winner, playerColor, difficulty } = body;
+  if (
+    !["w", "b", "draw"].includes(String(winner)) ||
+    !["w", "b"].includes(String(playerColor)) ||
+    (difficulty && !["easy", "medium", "hard"].includes(difficulty))
+  ) {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
 
   // Player outcome
   const isDraw = winner === "draw";

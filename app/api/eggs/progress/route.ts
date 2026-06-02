@@ -1,21 +1,36 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { rateLimit, readJson } from "@/lib/server/apiGuards";
 
-// Simple local cookie-based progress for now
 export async function GET() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const found = cookieStore.get("eggs-found")?.value;
-  return NextResponse.json({ found: found ? JSON.parse(found) : [] });
+  if (!found) return NextResponse.json({ found: [] });
+
+  try {
+    const parsed = JSON.parse(found);
+    return NextResponse.json({ found: Array.isArray(parsed) ? parsed.slice(0, 20) : [] });
+  } catch {
+    return NextResponse.json({ found: [] });
+  }
 }
 
 export async function POST(req: Request) {
-  const body = await req.json();
-  const { found } = body;
+  const limited = rateLimit(req, "eggs-progress", 40, 60_000);
+  if (limited) return limited;
 
-  // Save back to cookies (so user’s browser remembers progress)
-  cookies().set("eggs-found", JSON.stringify(found), {
+  const body = await readJson<{ found?: unknown }>(req, 2_048);
+  const found = Array.isArray(body?.found)
+    ? body.found.filter((item): item is string => typeof item === "string" && item.length <= 40).slice(0, 20)
+    : [];
+
+  const cookieStore = await cookies();
+  cookieStore.set("eggs-found", JSON.stringify(found), {
     path: "/",
-    httpOnly: false, // allow client-side JS to update
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 24 * 180,
   });
 
   return NextResponse.json({ success: true });

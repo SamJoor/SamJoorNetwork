@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Chess, Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
+import TerminalSiteNav from "@/components/TerminalSiteNav";
 
 type Difficulty = "easy" | "medium" | "hard";
 type Result = "win" | "loss" | "draw";
@@ -442,17 +443,21 @@ export default function ChessPage() {
   /* ---------------- Render ---------------- */
 
   return (
-    <div className="p-6 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="md:col-span-2 relative">
-        <div className="mb-3">
+    <div className="site-shell min-h-screen">
+    <TerminalSiteNav />
+    <div className="chess-fit-page">
+    <div className="mx-auto grid h-full max-w-6xl grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="relative md:col-span-2">
+        <div className="mb-2">
           <a
             href="/"
-            className="inline-block text-sm px-3 py-1 border rounded hover:bg-gray-100 transition"
+            className="btn btn-subtle"
           >
             ← Back
           </a>
         </div>
 
+        <div className="panel chess-board-panel overflow-hidden p-3">
         <Chessboard
           position={fen}
           onPieceDrop={onPieceDrop}
@@ -465,18 +470,19 @@ export default function ChessPage() {
           }}
           arePiecesDraggable={!thinking && !gameOver}
         />
+        </div>
 
         {thinking && !gameOver && (
-          <div className="absolute inset-0 bg-black/25 flex items-center justify-center pointer-events-none">
-            <div className="bg-white/90 px-4 py-2 rounded-xl text-sm font-semibold shadow">
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-950/25 pointer-events-none">
+            <div className="rounded-2xl border border-black/10 bg-white/95 px-5 py-3 text-sm font-black shadow-xl">
               AI is thinking<span className="animate-pulse">…</span>
             </div>
           </div>
         )}
 
         {gameOver && (
-          <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-xl text-center space-y-3">
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-950/75 p-4">
+            <div className="panel max-w-sm p-6 text-center">
               <h2 className="text-2xl font-bold">
                 {result === "win" && "You Win 🎉"}
                 {result === "loss" && "You Lose"}
@@ -490,10 +496,10 @@ export default function ChessPage() {
               )}
 
               <div className="flex gap-3 justify-center mt-4">
-                <button className="border px-4 py-2" onClick={resetGame}>
+                <button className="btn btn-primary" onClick={resetGame}>
                   Play Again
                 </button>
-                <a href="/" className="border px-4 py-2">
+                <a href="/" className="btn btn-subtle">
                   Back to Menu
                 </a>
               </div>
@@ -502,9 +508,14 @@ export default function ChessPage() {
         )}
       </div>
 
-      <div className="space-y-4">
+      <div className="chess-side-panel space-y-3">
+        <div className="panel p-4">
+          <h1 className="text-2xl font-black">Chess lab</h1>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Pick a name, choose a difficulty, and play the network bot.
+          </p>
         <input
-          className="border p-2 w-full"
+          className="mt-5 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-medium outline-none focus:border-blue-500"
           placeholder="First + last name"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
@@ -512,7 +523,7 @@ export default function ChessPage() {
 
         <div className="flex items-center justify-between gap-3">
           <select
-            className="border p-2 w-full"
+            className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-bold outline-none focus:border-blue-500"
             value={difficulty}
             onChange={(e) => setDifficulty(e.target.value as Difficulty)}
           >
@@ -527,13 +538,14 @@ export default function ChessPage() {
             </span>
           )}
         </div>
+        </div>
 
         {/* LEADERBOARD */}
-        <div className="border rounded p-3">
+        <div className="panel p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="font-bold">Leaderboard</h3>
+            <h3 className="text-xl font-black">Leaderboard</h3>
             <button
-              className="text-xs border px-2 py-1 rounded hover:bg-gray-100 transition"
+              className="btn btn-subtle min-h-8 px-3 py-1 text-xs"
               onClick={loadLeaderboard}
               type="button"
             >
@@ -553,7 +565,7 @@ export default function ChessPage() {
             {leaderboard.map((p, i) => (
               <li
                 key={p.username}
-                className="flex items-center justify-between gap-3"
+                className="flex items-center justify-between gap-3 rounded-xl border border-black/10 bg-white/70 px-3 py-2"
               >
                 <div className="truncate">
                   <span className="font-medium">
@@ -576,6 +588,8 @@ export default function ChessPage() {
           </ol>
         </div>
       </div>
+    </div>
+    </div>
     </div>
   );
 }

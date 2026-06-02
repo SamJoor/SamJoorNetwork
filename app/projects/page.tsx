@@ -1,94 +1,93 @@
-// app/projects/page.tsx
 import Link from "next/link";
+import { ArrowLeft, Github } from "lucide-react";
+import ProjectFlipCard, { type ProjectCardData } from "@/components/ProjectFlipCard";
+import TerminalSiteNav from "@/components/TerminalSiteNav";
 
-export const metadata = { title: "Projects — SamJoorNetwork" };
+export const metadata = { title: "Projects | SamJoor.com" };
 
-// ⚠️ This list is ONLY for the Projects page.
-// It does NOT affect your Home page.
-const projects = [
+const projects: ProjectCardData[] = [
+  {
+    title: "Data Science Capstone",
+    date: "2026",
+    blurb: "A Python modeling pipeline that cleans a dataset, trains scikit-learn models, saves model outputs, and generates evaluation plots.",
+    tags: ["Python", "Data Science", "Modeling", "Analysis"],
+    links: [{ label: "GitHub", href: "https://github.com/SamJoor/Data-Science-Capstone" }],
+  },
   {
     title: "Chess Minigame",
     date: "2026",
-    blurb:
-      "Fully functional chess game with an AI opponent and a leaderboard.",
-    tags: ["Next.js", "Chess.js", "AI", "Supabase"],
+    blurb: "Chess minigame vs AI opponent that learns each game.",
+    tags: ["Next.js", "Chess.js", "AI", "Game Logic"],
     links: [
-      { label: "Github", href: "https://github.com/SamJoor/SamJoorNetwork" },
+      { label: "Play", href: "/chess" },
+      { label: "GitHub", href: "https://github.com/SamJoor/SamJoorNetwork" },
     ],
   },
   {
-    title: "Store Page",
+    title: "Python Projects",
     date: "2025",
-    blurb:
-      "This is for my brand, it inlcudes a password page, SVG logo with motion, interactive store visuals.",
-    tags: ["Next.js", "Tailwind", "Framer Motion", "TypeScript"],
+    blurb: "A collection of Python coursework and experiments that show the programming side of the data science track.",
+    tags: ["Python", "Scripting", "Coursework", "Problem Solving"],
+    links: [{ label: "GitHub", href: "https://github.com/SamJoor/Python-Projects" }],
+  },
+  {
+    title: "Java Projects",
+    date: "2025",
+    blurb: "Java class projects and practice work, useful as a clean Computer Science signal beside the web and Python work.",
+    tags: ["Java", "Computer Science", "OOP", "Coursework"],
+    links: [{ label: "GitHub", href: "https://github.com/SamJoor/Java-Projects" }],
+  },
+  {
+    title: "QUPSC Website",
+    date: "2025",
+    blurb: "A club website for the Quinnipiac University Political Science Club, built as a real public-facing web project.",
+    tags: ["TypeScript", "Web", "Club Site", "Vercel"],
     links: [
-      { label: "Github", href: "https://github.com/SamJoor/Webby" },
+      { label: "Live", href: "https://qupsc-website.vercel.app" },
+      { label: "GitHub", href: "https://github.com/SamJoor/QUPSC-Website" },
     ],
   },
   {
-    title: "Automated Windows Sandbox ",
+    title: "QUPDT Website",
     date: "2025",
-    blurb:
-      "One-command malware detonation lab: start VM, run task, collect logs, archive artifacts to host.",
-    tags: ["PowerShell", "VirtualBox", "Automation", "Security"],
-    links: [{ label: "WIP", href: "#" }],
-    },
-    {
-      title: "Portfolio Website",
-      date: "2025",
-      blurb: "Fun interactive way for me to dsiplay my expertise and enjoyment for coding and cybersecuirty",
-      tags: ["Next.js", "Tailwind", "Vercel", "Git", "SQL", "Love", "/api", "/coffee"],
-      links: [{ label: "Github", href: "https://github.com/SamJoor/SamJoorNetwork" }],
+    blurb: "A fraternity website project focused on clear information architecture, public presentation, and deployment.",
+    tags: ["TypeScript", "Web", "Organization Site", "Vercel"],
+    links: [
+      { label: "Live", href: "https://qupd-twebsite.vercel.app" },
+      { label: "GitHub", href: "https://github.com/SamJoor/QUPDTwebsite" },
+    ],
   },
-  {
-      title: "Stock Analyzer",
-      date: "2025",
-      blurb: "A stock analysis dashboard that utilizes an LLM, Python, React and APIs to analyze stocks and provide buy/hold/sell recommendations",
-      tags: ["Next.js", "Python", "APIs", "Git", "SQL", "LLM", "Machine Learning",],
-      links: [{ label: "Github", href: "https://github.com/SamJoor/StocksAdvisory" }],
-  },
-  ];
-
-
+];
 
 export default function ProjectsPage() {
   return (
-    <div className="container-page py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Projects</h1>
-        <Link href="/" className="btn">Home</Link>
-      </div>
-
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {projects.map((p, i) => (
-          <div key={i} className="card p-4 flex flex-col">
-            <div className="text-sm text-zinc-500">{p.date}</div>
-            <h2 className="text-lg font-semibold mt-1">{p.title}</h2>
-            <p className="text-sm text-zinc-700 mt-3 leading-relaxed">{p.blurb}</p>
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              {p.tags.map((t) => (
-                <span key={t} className="pill">{t}</span>
-              ))}
-            </div>
-
-            <div className="mt-4 flex gap-2">
-              {p.links?.map((l, k) => (
-                <a
-                  key={k}
-                  href={l.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn"
-                >
-                  {l.label}
-                </a>
-              ))}
-            </div>
+    <main className="site-shell min-h-screen">
+      <TerminalSiteNav />
+      <div className="container-page site-fit-page projects-fit-page">
+        <div className="projects-fit-header">
+          <div>
+            <Link href="/" className="btn btn-subtle">
+              <ArrowLeft className="size-4" />
+              Home
+            </Link>
+            <h1>Project lab</h1>
+            <p>
+              A working shelf of web apps, data projects, CS coursework, and
+              small systems that became more useful than the assignment.
+            </p>
           </div>
-        ))}
+          <a href="https://github.com/SamJoor" target="_blank" rel="noopener noreferrer" className="btn btn-ink">
+            <Github className="size-4" />
+            GitHub profile
+          </a>
+        </div>
+
+        <div className="projects-fit-grid">
+          {projects.map((project) => (
+            <ProjectFlipCard key={project.title} project={project} />
+          ))}
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

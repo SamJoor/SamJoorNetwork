@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/server/supabase";
+import { isFen, rateLimit } from "@/lib/server/apiGuards";
 
 function positionKey(fen: string) {
   return fen.split(" ").slice(0, 4).join(" ");
 }
 
 export async function GET(req: Request) {
+  const limited = rateLimit(req, "chess-learned", 120, 60_000);
+  if (limited) return limited;
+
   const fen = new URL(req.url).searchParams.get("fen");
-  if (!fen) return NextResponse.json({ move: null });
+  if (!fen || !isFen(fen)) return NextResponse.json({ move: null });
 
   const key = positionKey(fen);
 

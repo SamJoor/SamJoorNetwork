@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/server/supabase";
+import { rateLimit } from "@/lib/server/apiGuards";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const limited = rateLimit(req, "chess-leaderboard", 120, 60_000);
+  if (limited) return limited;
+
   const { data, error } = await supabaseAdmin
     .from("chess_players")
     .select("username, elo, wins, draws, losses")

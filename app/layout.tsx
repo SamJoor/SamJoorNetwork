@@ -1,29 +1,23 @@
 import "../styles/globals.css";
 
 export const metadata = {
-  title: "SamJoorNetwork",
-  description: "The world’s #1 professional network… of Sam Joor.",
+  title: "SamJoor.com",
+  description:
+    "Sam Joor's portfolio: projects, security labs, data tools, chess, and hidden surprises.",
   icons: {
     icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.ico?v=7", sizes: "32x32" },
+      { url: "/favicon-64.png?v=7", type: "image/png", sizes: "64x64" },
     ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: [{ url: "/favicon.ico?v=7" }],
+    apple: [{ url: "/favicon-64.png?v=7", type: "image/png", sizes: "64x64" }],
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen">
-        {/* Global overlays that don't need props can stay here */}
-        {/* <RetroStyle /> */}
-        {/* <EasterEggs /> */}
-        {/* <SecretModal /> */}
-
-        {/* Do NOT render <LeaderboardPrompt /> here. */}
-        {children}
-      </body>
+      <body className="min-h-screen">{children}</body>
     </html>
   );
 }

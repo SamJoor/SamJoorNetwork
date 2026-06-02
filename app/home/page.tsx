@@ -1,5 +1,5 @@
 import TerminalGateway from "@/components/TerminalGateway";
 
-export default function Page() {
+export default function HomePage() {
   return <TerminalGateway />;
 }

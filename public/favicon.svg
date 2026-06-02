@@ -1,21 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#2563EB"/>
-  <!-- S curve -->
-  <path
-    d="M42 20c-3-3-7-4-11-4-6 0-11 3-11 8 0 9 18 6 18 13 0 4-4 6-9 6-4 0-8-1-11-4"
-    stroke="white"
-    stroke-width="4"
-    fill="none"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-  <!-- J curve -->
-  <path
-    d="M45 20v18c0 7-4 10-10 10-3 0-6-1-8-3"
-    stroke="white"
-    stroke-width="4"
-    fill="none"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <rect width="64" height="64" fill="#000000"/>
+  <g fill="#7cff00">
+    <!-- S -->
+    <rect x="8" y="16" width="20" height="4"/>
+    <rect x="8" y="20" width="4" height="12"/>
+    <rect x="8" y="32" width="20" height="4"/>
+    <rect x="24" y="36" width="4" height="12"/>
+    <rect x="8" y="48" width="20" height="4"/>
+    <!-- J -->
+    <rect x="34" y="16" width="18" height="4"/>
+    <rect x="46" y="20" width="4" height="24"/>
+    <rect x="34" y="44" width="4" height="4"/>
+    <rect x="38" y="48" width="8" height="4"/>
+    <!-- > -->
+    <rect x="54" y="22" width="4" height="4"/>
+    <rect x="58" y="26" width="4" height="4"/>
+    <rect x="54" y="30" width="4" height="4"/>
+    <rect x="50" y="34" width="4" height="4"/>
+    <rect x="54" y="38" width="4" height="4"/>
+    <rect x="58" y="42" width="4" height="4"/>
+    <rect x="54" y="46" width="4" height="4"/>
+  </g>
 </svg>
