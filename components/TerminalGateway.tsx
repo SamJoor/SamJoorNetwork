@@ -43,7 +43,7 @@ export default function TerminalGateway() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [shrinkCount, setShrinkCount] = useState(0);
   const [isRebounding, setIsRebounding] = useState(false);
-  const [isShattering, setIsShattering] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(false);
   const [lines, setLines] = useState<GatewayLine[]>([
     { id: 2, kind: "typing", text: "" },
   ]);
@@ -258,13 +258,13 @@ export default function TerminalGateway() {
     }
   }
 
-  function handleCloseAnimation() {
-    if (isShattering) return;
-    setIsShattering(true);
+  function handleSpinAnimation() {
+    if (isSpinning) return;
+    setIsSpinning(true);
     window.setTimeout(() => {
-      setIsShattering(false);
+      setIsSpinning(false);
       inputRef.current?.focus();
-    }, 1180);
+    }, 760);
   }
 
   const terminalClassName = [
@@ -272,7 +272,7 @@ export default function TerminalGateway() {
     isFullscreen ? "is-fullscreen" : "",
     shrinkCount ? `is-shrunk-${shrinkCount}` : "",
     isRebounding ? "is-rebounding" : "",
-    isShattering ? "is-shattering" : "",
+    isSpinning ? "is-spinning" : "",
   ].filter(Boolean).join(" ");
 
   return (
@@ -294,16 +294,11 @@ export default function TerminalGateway() {
             >
               □
             </button>
-            <button type="button" aria-label="Break and restore terminal" onClick={handleCloseAnimation}>
+            <button type="button" aria-label="Spin terminal" onClick={handleSpinAnimation}>
               X
             </button>
           </div>
         </div>
-        {isShattering ? (
-          <div className="sj-glass-break" aria-hidden="true">
-            {Array.from({ length: 18 }, (_, index) => <span key={index} />)}
-          </div>
-        ) : null}
         <div className="sj-gateway-body" ref={bodyRef}>
           {lines.map((line) => <GatewayOutput key={line.id} line={line} />)}
           <form className="sj-gateway-input" onSubmit={submit}>
