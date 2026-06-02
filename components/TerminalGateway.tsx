@@ -37,6 +37,7 @@ const resumeDownloadName = "SAM_JOOR_RESUME.pdf";
 const welcomeTypingMs = 68;
 const commandIntroDelayMs = 360;
 const commandLineDelayMs = 210;
+const terminalSpinMs = 1800;
 
 export default function TerminalGateway() {
   const router = useRouter();
@@ -267,7 +268,7 @@ export default function TerminalGateway() {
     window.setTimeout(() => {
       setIsSpinning(false);
       inputRef.current?.focus();
-    }, 760);
+    }, terminalSpinMs);
   }
 
   const terminalClassName = [
