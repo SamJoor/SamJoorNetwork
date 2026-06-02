@@ -34,6 +34,9 @@ const allCommands = [...commands, ...utilityCommands];
 const commandNames = allCommands.map((command) => command.name);
 const resumeHref = "/SAM_JOOR_RESUME.pdf";
 const resumeDownloadName = "SAM_JOOR_RESUME.pdf";
+const welcomeTypingMs = 68;
+const commandIntroDelayMs = 360;
+const commandLineDelayMs = 210;
 
 export default function TerminalGateway() {
   const router = useRouter();
@@ -80,11 +83,11 @@ export default function TerminalGateway() {
           ];
 
           introLines.forEach((line, lineIndex) => {
-            window.setTimeout(() => append([line]), lineIndex * 120);
+            window.setTimeout(() => append([line]), lineIndex * commandLineDelayMs);
           });
-        }, 160);
+        }, commandIntroDelayMs);
       }
-    }, 42);
+    }, welcomeTypingMs);
 
     return () => window.clearInterval(interval);
   }, []);
