@@ -37,7 +37,7 @@ const resumeDownloadName = "SAM_JOOR_RESUME.pdf";
 const welcomeTypingMs = 68;
 const commandIntroDelayMs = 360;
 const commandLineDelayMs = 210;
-const terminalSpinMs = 1800;
+const terminalSpinMs = 3600;
 
 export default function TerminalGateway() {
   const router = useRouter();
