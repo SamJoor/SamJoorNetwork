@@ -1,558 +1,753 @@
-'use client';
+"use client";
 
 import Link from "next/link";
-import ProjectCard from "@/components/ProjectCard";
-import React from "react";
-import { motion } from "framer-motion";
 import {
-  Github,
-  Mail,
-  Globe,
-  Linkedin,
-  CalendarDays,
+  ArrowRight,
+  BarChart3,
   Code2,
-  Star,
-  ExternalLink,
+  Egg,
+  FileText,
+  Github,
+  Home,
+  Linkedin,
+  MonitorCog,
+  Mail,
   MapPin,
-  Link as LinkIcon,
-  Award,
-  Briefcase,
-  Sparkles,
-  Apple,
+  Menu,
+  ShieldCheck,
+  Swords,
+  Terminal,
+  UserRound,
+  X,
+  type LucideIcon,
 } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent } from "react";
+import { usePathname } from "next/navigation";
+import { markEggFound } from "@/lib/eggProgress";
 
-/* ---------- Branding ---------- */
-const SITE_NAME = "SamJoorNetwork";
+type ActivitySource = "GitHub" | "LinkedIn";
 
-/* ---------- Profile Data ---------- */
-const profile = {
-  name: "Sam Joor",
-  headline: "Full-Stack Developer • Cybersecurity Entusiast ",
-  location: "Boston, MA",
-  avatarInitials: "SJ",
-  about:
-    "I love learning especially when its cybersecurity/computer related...🤓",
-  badges: [
-    { icon: Apple, label: "Student" },
-    { icon: Briefcase, label: "Unemployed" },
-  ],
-  links: [
-    { icon: Github, label: "GitHub", href: "https://github.com/SamJoor?tab=repositories" },
-    { icon: Globe, label: "Website", href: "https://example.com" },
-    { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/samjoor/" },
-    { icon: Mail, label: "skjoor@quinnipiac.edu", href: "mailto:skjoor@quinnipiac.edu" },
-  ],
-};
-
-
-/* ---------- Projects ---------- */
-const featuredProject = {
-  title: "Automated Windows Sandbox (WIP) ",
-  role: "VirtualBox • Sysmon/Procmon/Wireshark • Powershell",
-  date: "2025",
-  blurb:
-    "A fully automated malware analysis sandbox on VirtualBox that uses tools such as WireShark, Procmon and Sysmon. With just one command, it boots a Windows VM, executes, and gathers logs from Sysmon, Procmon, and Wireshark. Results are returned to the host machine to allow for reverse-engineering and forensic analysis.",
-  tags: ["VirtualBox", "Powershell automation", "Sysmon + Procmon", "Wireshark"],
-  highlights: [
-    "One-command automation: spin up, execute, and collect logs",
-    "Host stored results for analysis",
-    "Built for malware detonation and reverse-engineering,",
-    "Centralized log collection"
-  ],
-  links: [
-    { label: "", href: "#" },
-    { label: "", href: "#" },
-  ],
-  progress: 30, 
-  status: "Working through automation errors", 
-};
-
-/* ---------- Reusable UI ---------- */
-const Card = ({
-  children,
-  className = "",
-}: React.PropsWithChildren<{ className?: string }>) => (
-  <div className={`card ${className}`}>{children}</div>
-);
-
-const SectionTitle = ({
-  icon: Icon,
-  children,
-}: {
-  icon: any;
-  children: React.ReactNode;
-}) => (
-  <div className="section-title">
-    <Icon className="size-4" />
-    <span>{children}</span>
-  </div>
-);
-
-const Pill = ({ children }: { children: React.ReactNode }) => (
-  <span className="pill">{children}</span>
-);
-
-const LinkButton = ({
-  href,
-  children,
-}: {
+type ActivityItem = {
+  id: string;
+  source: ActivitySource;
+  title: string;
+  text: string;
+  meta: string;
   href: string;
-  children: React.ReactNode;
-}) => (
-  <a href={href} className="btn">
-    {children}
-  </a>
-);
+};
 
-/* ---------- Page ---------- */
-export default function DevLinkd() {
+type TerminalLine = {
+  id: number;
+  kind: "prompt" | "text" | "success" | "error" | "command" | "link";
+  text: string;
+  href?: string;
+};
+
+const fallbackActivities: ActivityItem[] = [
+  {
+    id: "github-fallback",
+    source: "GitHub",
+    title: "Loading GitHub activity",
+    text: "Fetching the latest public events from GitHub.",
+    meta: "Live / GitHub",
+    href: "https://github.com/SamJoor?tab=repositories",
+  },
+];
+
+const terminalCommands = [
+  { command: "about", text: "Show info about Sam Joor" },
+  { command: "projects", text: "List featured projects" },
+  { command: "skills", text: "Display core skills" },
+  { command: "experience", text: "Show work experience" },
+  { command: "contact", text: "Get in touch" },
+  { command: "github", text: "Open GitHub profile" },
+  { command: "linkedin", text: "Open LinkedIn profile" },
+  { command: "resume", text: "Download resume" },
+  { command: "chess", text: "Open the chess lab" },
+  { command: "egg", text: "Try your luck" },
+  { command: "ls", text: "List site directories" },
+  { command: "pwd", text: "Print working directory" },
+  { command: "date", text: "Show current local time" },
+  { command: "whoami", text: "Identify this terminal session" },
+  { command: "open", text: "Open a route: open projects | chess | about" },
+  { command: "clear", text: "Clear the terminal" },
+];
+
+const terminalCommandNames = terminalCommands.map((item) => item.command);
+
+const projects = [
+  {
+    icon: MonitorCog,
+    title: "Automated Windows Sandbox",
+    text: "Automatically provisions, configures, tests, and cleans up isolated Windows environments.",
+    tags: ["PowerShell", "Python", "VM", "Automation"],
+    tone: "blue",
+    href: "/projects",
+  },
+  {
+    icon: BarChart3,
+    title: "Stock Analyzer",
+    text: "End-to-end data pipeline with technical indicators, ML models, and backtesting.",
+    tags: ["Python", "Pandas", "Scikit-learn", "Streamlit"],
+    tone: "green",
+    href: "/projects",
+  },
+  {
+    icon: Code2,
+    title: "Portfolio Website",
+    text: "A playful LinkedIn-style portfolio with hacker vibes and hidden surprises.",
+    tags: ["Next.js", "TypeScript", "Tailwind CSS"],
+    tone: "coral",
+    href: "/projects",
+  },
+];
+
+export function LogoSJ({ className = "h-7 w-7" }: { className?: string }) {
   return (
-    <div className="min-h-screen">
-      <TopNav />
-      <main className="container-page py-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {/* Left column */}
-        <div className="lg:col-span-3 space-y-6">
-          <ProfileCard />
-          <BadgesCard />
-        </div>
+    <span className={`${className} inline-flex items-center justify-center font-mono font-black text-lime-400`}>
+      SJ&gt;
+    </span>
+  );
+}
 
-        {/* Middle column */}
-        <div className="lg:col-span-6 space-y-6">
-          <IntroPost />
-          <ProjectsFeed />
-        </div>
+export default function DevLinkd() {
+  const [scale, setScale] = useState(1);
 
-        {/* Right column */}
-        <div className="lg:col-span-3 space-y-6">
-          <ContactCard />
-          <QuickLinks />
+  useEffect(() => {
+    const syncScale = () => {
+      const width = window.innerWidth;
+      setScale(width >= 1024 && width < 1536 ? width / 1536 : 1);
+    };
+
+    syncScale();
+    window.addEventListener("resize", syncScale);
+    return () => window.removeEventListener("resize", syncScale);
+  }, []);
+
+  const shellStyle: CSSProperties = scale < 1 ? { minHeight: `${1120 * scale}px` } : {};
+  const pageStyle: CSSProperties = scale < 1 ? { transform: `scale(${scale})` } : {};
+
+  return (
+    <div className="sj-scale-shell" style={shellStyle}>
+      <div className="sj-page" style={pageStyle}>
+        <TopNav />
+        <div className="sj-layout sj-layout-home">
+          <ProtocolRail />
+          <ProfileRail />
+          <main className="sj-main">
+            <Hero />
+            <ActivityFeed />
+          </main>
         </div>
-      </main>
-      <Footer />
+        <FeaturedProjects />
+      </div>
     </div>
   );
 }
 
-/* ---------- Top Navigation ---------- */
-import { useState, useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
-import { Egg as EggIcon, Menu, X, User, Code2 as CodeIcon } from "lucide-react";
-
-// adjust the path if this file isn't in app/components/
-import ClickyLogo from "./ClickyLogo";
-
 function TopNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const panelRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close sheet on route change
-  useEffect(() => { if (open) setOpen(false); }, [pathname]);
-
-  // Close on ESC
+  useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  // Close when clicking outside the panel
-  useEffect(() => {
-    const onClick = (e: MouseEvent) => {
+    const onClick = (event: MouseEvent) => {
       if (!open) return;
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) setOpen(false);
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
     };
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
 
   return (
-    <div className={`sticky top-0 z-50 border-b border-zinc-200 bg-white/70 backdrop-blur ${open ? "shadow-sm" : ""}`}>
-      <div className="container-page h-14 flex items-center justify-between gap-2">
-        {/* Logo + site name */}
-        <div className="flex items-center gap-2 min-w-0">
-          {/* Wrap the logo so 5 clicks unlock the egg */}
-          <ClickyLogo>
-            <LogoSJ className="h-7 w-7 shrink-0" />
-          </ClickyLogo>
-          <Link href="/" className="font-bold tracking-tight truncate">
-            {SITE_NAME}
-          </Link>
-        </div>
+    <header className="sj-topbar">
+      <Link href="/" className="sj-brand">
+        <LogoSJ className="sj-logo-mark" />
+        <strong>SamJoor<span>.com</span></strong>
+      </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1">
-          <NavLink href="/egg-hunt" label="Egg Hunt" icon={EggIcon} />
-          <NavLink href="/" label="Home" icon={User} />
-          <NavLink href="/projects" label="Projects" icon={CodeIcon} />
-          <NavLink href="/aboutme" label="About me" icon={User} />
-          <NavLink href="/chess" label="Chess" icon={CodeIcon} />
-        </nav>
+      <nav className="sj-nav">
+        <NavItem href="/aboutme" icon={UserRound} label="About" />
+        <NavItem href="/projects" icon={Home} label="Projects" />
+        <NavItem href="https://www.linkedin.com/in/samjoor/" icon={Linkedin} label="LinkedIn" external />
+        <NavItem href="https://github.com/SamJoor?tab=repositories" icon={Github} label="GitHub" external />
+        <NavItem href="/egg-hunt" icon={Egg} label="Easter Eggs" />
+        <Link href="/chess">
+          <Swords className="size-5" /> Chess
+        </Link>
+      </nav>
 
-        {/* Desktop actions (with playful hover) */}
-        <div className="hidden md:flex items-center gap-2">
-          <a
-            href="/SamJoorResume.pdf"
-            download
-            className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
-          >
-            Download Resume
-          </a>
-          <a
-            href="mailto:skjoor@quinnipiac.edu"
-            className="btn-primary transform transition duration-200 ease-out hover:scale-110 hover:rotate-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
-          >
-            Connect
-          </a>
-        </div>
-
-        {/* Hamburger (mobile) */}
-        <button
-          className="md:hidden inline-flex items-center justify-center p-2 rounded-lg border border-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
-          aria-label="Toggle menu"
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-          onClick={() => setOpen(s => !s)}
-        >
-          {open ? <X className="size-5" /> : <Menu className="size-5" />}
-        </button>
+      <div className="sj-system">
+        <span /> SYSTEM ONLINE
+        <img className="sj-alien" src="/pixel-alien.png" alt="" aria-hidden="true" />
       </div>
 
-      {/* Mobile sheet */}
-      {open && (
-        <div
-          id="mobile-menu"
-          ref={panelRef}
-          className="md:hidden z-[60] border-t border-zinc-200 bg-white/95 backdrop-blur-sm"
-        >
-          <div className="container-page py-3 flex flex-col gap-2">
-            <Link href="/egg-hunt" className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2">
-              Egg Hunt
-            </Link>
-            <Link href="/" className="btn transform transition duration-200 ease-out hover:scale-110 hover:rotate-2">
-              Home
-            </Link>
-            <Link href="/projects" className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2">
-              Projects
-            </Link>
-            <Link href="/aboutme" className="btn transform transition duration-200 ease-out hover:scale-110 hover:rotate-2">
-              About me
-            </Link>
-            <Link href="/chess" className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2">
-              Chess
-            </Link>
-            <div className="mt-2 h-px bg-zinc-200" />
+      <button className="sj-menu" onClick={() => setOpen((value) => !value)} aria-label="Toggle menu">
+        {open ? <X className="size-5" /> : <Menu className="size-5" />}
+      </button>
 
-            <a
-              href="/SamJoorResume.pdf"
-              download
-              className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2"
-            >
-              Download Resume
-            </a>
-            <a
-              href="mailto:skjoor@quinnipiac.edu"
-              className="btn-primary text-center transform transition duration-200 ease-out hover:scale-110 hover:rotate-2"
-            >
-              Connect
-            </a>
-          </div>
+      {open ? (
+        <div ref={menuRef} className="sj-mobile-menu">
+          <Link href="/projects">Projects</Link>
+          <a href="https://www.linkedin.com/in/samjoor/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <a href="https://github.com/SamJoor?tab=repositories" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <Link href="/aboutme">About</Link>
+          <Link href="/chess">Chess</Link>
+          <Link href="/egg-hunt">Easter Eggs</Link>
+          <a href="/SAM_JOOR_RESUME.pdf" download="SAM_JOOR_RESUME.pdf">Resume</a>
         </div>
-      )}
-    </div>
+      ) : null}
+    </header>
   );
 }
 
-function NavLink({
+function NavItem({
   href,
-  label,
   icon: Icon,
+  label,
+  external = false,
 }: {
   href: string;
+  icon: LucideIcon;
   label: string;
-  icon?: any;
+  external?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className="btn transform transition duration-200 ease-out hover:scale-110 hover:-rotate-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer" : undefined}
     >
-      {Icon ? <Icon className="size-4" /> : null} {label}
+      <Icon className="size-5" />
+      {label}
     </Link>
   );
 }
-/* ---------- Left Column ---------- */
-function ProfileCard() {
-  return (
-    <Card className="overflow-hidden">
-      {/* Banner with name inside */}
-      <div className="relative h-28 md:h-32 bg-gradient-to-r from-blue-600 to-indigo-500">
-        <div className="absolute inset-x-4 md:inset-x-6 bottom-3 text-white">
-          <h1 className="text-xl md:text-2xl font-semibold leading-tight">Sam Joor</h1>
-          <p className="text-xs md:text-sm/5 opacity-95">
-            Full-Stack Developer • Data Science • Cybersecurity
-          </p>
-          <p className="text-[11px] md:text-xs opacity-90 mt-0.5 flex items-center gap-1">
-            <MapPin className="size-3" /> New Haven, CT
-          </p>
-        </div>
-      </div>
 
-      {/* Body: avatar + chips */}
-      <div className="p-4 md:p-5 flex items-start gap-3 md:gap-4">
-        <div className="size-16 md:size-20 rounded-xl bg-zinc-200 border border-white shadow-md flex items-center justify-center text-lg md:text-2xl font-bold text-zinc-700">
-          SJ
-        </div>
-        <div className="flex-1">
-          <div className="flex flex-wrap gap-2">
-            <Pill>Looking For Work💼</Pill>
-          </div>
-        </div>
+function ProtocolRail() {
+  return (
+    <aside className="sj-protocol" aria-hidden="true">
+      <div className="sj-dots">
+        <span />
+        <span />
+        <span />
       </div>
-    </Card>
+      <div className="sj-dots sj-dots-blue">
+        <span />
+        <span />
+        <span />
+      </div>
+      <p>SJ_PROTOCOL V1.0</p>
+      <strong>[_]</strong>
+    </aside>
   );
 }
 
-
-function BadgesCard() {
+function ProfileRail() {
   return (
-    <Card className="p-4">
-      <SectionTitle icon={Star}>Badges</SectionTitle>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {profile.badges.map((b, i) => (
-          <span
-            key={i}
-            className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-amber-50 border border-amber-200"
-          >
-            <b.icon className="size-3" /> {b.label}
-          </span>
-        ))}
+    <aside className="sj-profile">
+      <div className="sj-avatar-wrap">
+        <img src="/sam-profile.png" alt="Portrait of Sam Joor" />
       </div>
-    </Card>
+      <h1>Sam Joor</h1>
+      <div className="sj-available"><span /> Available for work</div>
+
+      <div className="sj-role">&gt; Full-stack developer</div>
+      <ProfileItem icon={ShieldCheck} label="Cybersecurity" />
+      <ProfileItem icon={BarChart3} label="Data Science" />
+      <ProfileItem icon={Terminal} label="Automation" />
+      <ProfileItem icon={Code2} label="Computer Science" />
+      <ProfileItem icon={BarChart3} label="Economics" />
+
+      <div className="sj-note">
+        <p>
+          I build secure, intelligent, and automated systems that solve real
+          problems. I break things on purpose, learn constantly, and hide
+          easter eggs everywhere.
+        </p>
+      </div>
+
+      <div className="sj-location">
+        <p><MapPin className="size-4" /> Newburyport, MA</p>
+        <p><span className="sj-clock" /> EDT (UTC-4)</p>
+      </div>
+
+      <div className="sj-socials">
+        <a href="https://github.com/SamJoor?tab=repositories" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><Github /></a>
+        <a href="https://www.linkedin.com/in/samjoor/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><Linkedin /></a>
+        <a href="mailto:skjoor@quinnipiac.edu" aria-label="Email"><Mail /></a>
+        <Link href="/chess" aria-label="Chess"><Swords /></Link>
+      </div>
+    </aside>
   );
 }
 
-/* ---------- Middle Column ---------- */
-function IntroPost() {
+function ProfileItem({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
   return (
-    <Card className="p-4">
-      <div className="flex items-center gap-2">
-        <div className="size-10 rounded-full bg-zinc-200 flex items-center justify-center font-semibold">
-          {profile.avatarInitials}
-        </div>
-        <div>
-          <div className="text-sm font-semibold">{profile.name}</div>
-          <div className="text-xs text-zinc-500">{profile.headline}</div>
-        </div>
-      </div>
-      <div className="mt-3 text-sm leading-relaxed">
-        Hey, Everyone. I made this website to list my projects and
-        introduce myself in a way that, hopefully, feels more 
-        engaging than reading a piece of paper. There are a bunch 
-        of little surprises, like an egg hunt and a chess minigame.
-        I plan on adding more fun stuff in the future. 
-        Feel free to connect with me! 
-        - Sam Joor
-      </div>
-    </Card>
-  );
-}
-
-
-function ProgressBar({
-  value,
-  label,
-}: {
-  value: number; // 0..100
-  label?: string;
-}) {
-  const pct = Math.max(0, Math.min(100, Math.round(value)));
-  const color =
-    pct < 34 ? "bg-blue-500" : pct < 67 ? "bg-turqoise-500" : "bg-emerald-500";
-
-  return (
-    <div
-      className="mt-4 select-none"
-      role="progressbar"
-      aria-label={label ?? "Project progress"}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={pct}
-      title={`${pct}% complete`}
-    >
-      <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200">
-        <div className={`h-2 ${color}`} style={{ width: `${pct}%` }} />
-      </div>
-      <div className="mt-1 flex items-center justify-between text-[10px] text-zinc-500">
-        <span>{pct < 100 ? "In progress" : "Complete"}</span>
-        <span className="tabular-nums">{pct}%</span>
-      </div>
+    <div className="sj-profile-item">
+      <Icon className="size-5" />
+      {label}
     </div>
   );
 }
 
-function ProjectsFeed() {
-  const p = featuredProject;
+function SourceIcon({ source }: { source: ActivitySource }) {
+  const Icon = source === "LinkedIn" ? Linkedin : Github;
+  return <Icon className="size-6" strokeWidth={2.25} aria-hidden="true" />;
+}
 
+function HeroMark() {
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold">
-        My favorite project at the moment
-      </h2>
+    <div className="sj-hero-mark" aria-hidden="true">
+      <Swords className="size-14" strokeWidth={2.1} />
+      <span>win</span>
+    </div>
+  );
+}
 
-      <Card className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="text-sm text-zinc-500 flex items-center gap-2">
-              <CalendarDays className="size-4" /> {p.date}
-            </div>
-            <h3 className="text-lg font-semibold mt-1">{p.title}</h3>
-            <div className="text-sm text-zinc-600">{p.role}</div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {p.links?.map((l, i) => (
-              <LinkButton key={i} href={l.href}>
-                {l.label}
-              </LinkButton>
-            ))}
-          </div>
-        </div>
-
-        <p className="text-sm text-zinc-700 mt-3 leading-relaxed">{p.blurb}</p>
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          {p.tags.map((t) => (
-            <Pill key={t}>{t}</Pill>
-          ))}
-        </div>
-
-        {p.highlights?.length ? (
-          <ul className="mt-3 grid gap-2 sm:grid-cols-2 list-disc list-inside text-sm text-zinc-700">
-            {p.highlights.map((h, i) => (
-              <li key={i}>{h}</li>
-            ))}
-          </ul>
-        ) : null}
-
-        {/* NEW: status + progress */}
-        {typeof p.progress === "number" || p.status ? (
-          <div className="mt-2">
-            {p.status ? (
-              <p className="text-xs text-zinc-500">
-                <span className="font-medium">Current status:</span> {p.status}
-              </p>
-            ) : null}
-            {typeof p.progress === "number" ? (
-              <ProgressBar value={p.progress} label="Automated Windows Sandbox progress" />
-            ) : null}
-          </div>
-        ) : null}
-      </Card>
-
-      {/* keep your CTA if you had one here */}
+function Hero() {
+  return (
+    <section className="sj-hero">
       <div>
-        <a href="/projects" className="btn">See all projects →</a>
+        <h2>
+          <span className="sj-headline-line">I build stuff. Secure it.</span>
+          <span className="sj-headline-line">Automate it. <span>Win</span> with it.</span>
+        </h2>
+        <div className="sj-code">
+          <code><span>while</span> (<b>curious</b>) {"{ build(); breakThings(); learn(); }"}</code>
+          <i />
+        </div>
       </div>
-    </div>
+      <HeroMark />
+    </section>
   );
 }
 
+function ActivityFeed() {
+  const [items, setItems] = useState<ActivityItem[]>(fallbackActivities);
+  const [linkedInConnected, setLinkedInConnected] = useState(false);
 
+  useEffect(() => {
+    let active = true;
 
-/* ---------- Right Column ---------- */
-function ContactCard() {
+    async function loadActivity() {
+      try {
+        const response = await fetch("/api/activity", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = (await response.json()) as {
+          items?: ActivityItem[];
+          linkedInConnected?: boolean;
+        };
+        if (!active) return;
+        setItems(data.items?.length ? data.items : fallbackActivities);
+        setLinkedInConnected(Boolean(data.linkedInConnected));
+      } catch {
+        if (active) setItems(fallbackActivities);
+      }
+    }
+
+    loadActivity();
+    const interval = window.setInterval(loadActivity, 5 * 60 * 1000);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, []);
+
   return (
-    <Card className="p-4">
-      <SectionTitle icon={Mail}>Contact</SectionTitle>
-      <div className="mt-3 flex flex-col gap-2">
-        {profile.links.map((l, i) => (
-          <a
-            key={i}
-            href={l.href}
-            target="_blank"                // 👈 opens in new tab
-            rel="noopener noreferrer"     // 👈 security best practice
-            className="w-full inline-flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50"
-          >
-            <span className="inline-flex items-center gap-2 text-sm">
-              <l.icon className="size-4" /> {l.label}
-            </span>
-            <ExternalLink className="size-4" />
+    <section className="sj-feed">
+      <div className="sj-feed-head">
+        <h2><span>SJ&gt;</span> Activity Feed</h2>
+        <p>Live: <strong>GitHub{linkedInConnected ? " + LinkedIn" : ""}</strong></p>
+      </div>
+      <div className="sj-feed-list">
+        {items.map((item) => (
+          <a href={item.href} key={item.id} className="sj-feed-row" target="_blank" rel="noopener noreferrer">
+            <div className="sj-feed-icon">
+              <SourceIcon source={item.source} />
+            </div>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.text}</p>
+              <small>{item.meta}</small>
+            </div>
           </a>
         ))}
       </div>
-    </Card>
+      <a href="https://github.com/SamJoor?tab=repositories" className="sj-view-all" target="_blank" rel="noopener noreferrer">
+        View GitHub activity <ArrowRight className="size-4" />
+      </a>
+    </section>
   );
 }
 
-function QuickLinks() {
-  return (
-    <Card className="p-4">
-      <SectionTitle icon={LinkIcon}>Quick links</SectionTitle>
-      <ul className="mt-3 text-sm leading-7">
-        <li><a className="hover:underline" href="/SamJoorResume.pdf" target="_blank" rel="noopener noreferrer">Resume.pdf</a></li>
-      </ul>
-    </Card>
-  );
-}
+function TerminalPanel() {
+  const [input, setInput] = useState("");
+  const [history, setHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState<number | null>(null);
+  const [lines, setLines] = useState<TerminalLine[]>([
+    { id: 1, kind: "prompt", text: "help" },
+    { id: 2, kind: "success", text: "Available commands:" },
+    ...terminalCommands.map((item, index) => ({
+      id: index + 3,
+      kind: "command" as const,
+      text: item.command.padEnd(11) + " " + item.text,
+    })),
+  ]);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight });
+  }, [lines]);
 
-/* ---------- Footer ---------- */
-function Footer() {
+  function append(nextLines: Omit<TerminalLine, "id">[]) {
+    setLines((current) => {
+      const startId = current.length ? current[current.length - 1].id + 1 : 1;
+      return [
+        ...current,
+        ...nextLines.map((line, index) => ({ ...line, id: startId + index })),
+      ].slice(-80);
+    });
+  }
+
+  async function runCommand(rawCommand: string) {
+    const displayCommand = rawCommand.trim();
+    const normalized = displayCommand.toLowerCase();
+    const [command = "", ...args] = normalized.split(/\s+/);
+    if (!command) return;
+
+    setHistory((current) => [...current.filter((item) => item !== displayCommand), displayCommand].slice(-30));
+    setHistoryIndex(null);
+
+    if (command === "clear") {
+      setInput("");
+      setLines([]);
+      return;
+    }
+
+    append([{ kind: "prompt", text: displayCommand }]);
+
+    if (command === "help" || command === "?") {
+      append([
+        { kind: "success", text: "Available commands:" },
+        ...terminalCommands.map((item) => ({
+          kind: "command" as const,
+          text: item.command.padEnd(11) + " " + item.text,
+        })),
+      ]);
+      return;
+    }
+
+    if (command === "whoami") {
+      append([
+        { kind: "text", text: "sam@SamJoor.com" },
+        { kind: "text", text: "Role: builder / student / cybersecurity + data systems" },
+      ]);
+      return;
+    }
+
+    if (command === "pwd") {
+      append([{ kind: "text", text: "/home/sam/portfolio" }]);
+      return;
+    }
+
+    if (command === "ls" || command === "dir") {
+      append([
+        { kind: "text", text: "about.txt  projects/  chess/  resume.pdf  contact.link  egg.lock" },
+      ]);
+      return;
+    }
+
+    if (command === "date") {
+      append([
+        { kind: "text", text: new Intl.DateTimeFormat("en-US", {
+          dateStyle: "medium",
+          timeStyle: "short",
+          timeZone: "America/New_York",
+        }).format(new Date()) + " EDT" },
+      ]);
+      return;
+    }
+
+    if (command === "about") {
+      append([
+        { kind: "text", text: "Sam Joor builds secure, automated, data-driven tools with a playful hacker-lab edge." },
+        { kind: "text", text: "Current focus: cybersecurity, data science, automation, and chess experiments." },
+      ]);
+      return;
+    }
+
+    if (command === "projects") {
+      append([
+        { kind: "success", text: "> Fetching featured projects..." },
+        ...projects.map((project, index) => ({ kind: "text" as const, text: "[" + (index + 1) + "] " + project.title })),
+        { kind: "link", text: "Open full projects page", href: "/projects" },
+      ]);
+      return;
+    }
+
+    if (command === "chess") {
+      append([{ kind: "link", text: "Open chess lab", href: "/chess" }]);
+      return;
+    }
+
+    if (command === "skills") {
+      append([
+        { kind: "text", text: "Core stack: TypeScript, Next.js, Python, PowerShell, SQL, data pipelines, VM automation." },
+        { kind: "text", text: "Domains: cybersecurity tooling, portfolio systems, chess logic, and applied data science." },
+      ]);
+      return;
+    }
+
+    if (command === "experience") {
+      append([
+        { kind: "text", text: "Student builder focused on shipping practical projects, security labs, and automation workflows." },
+        { kind: "link", text: "View resume", href: "/SAM_JOOR_RESUME.pdf" },
+      ]);
+      return;
+    }
+
+    if (command === "contact") {
+      append([
+        { kind: "link", text: "Email skjoor@quinnipiac.edu", href: "mailto:skjoor@quinnipiac.edu" },
+        { kind: "link", text: "LinkedIn profile", href: "https://www.linkedin.com/in/samjoor/" },
+      ]);
+      return;
+    }
+
+    if (command === "github") {
+      append([{ kind: "link", text: "GitHub profile", href: "https://github.com/SamJoor?tab=repositories" }]);
+      return;
+    }
+
+    if (command === "linkedin") {
+      append([{ kind: "link", text: "LinkedIn profile", href: "https://www.linkedin.com/in/samjoor/" }]);
+      return;
+    }
+
+    if (command === "resume") {
+      append([{ kind: "link", text: "Download resume", href: "/SAM_JOOR_RESUME.pdf" }]);
+      return;
+    }
+
+    if (command === "open") {
+      const target = args[0];
+      const routes: Record<string, { text: string; href: string }> = {
+        about: { text: "Open About page", href: "/aboutme" },
+        projects: { text: "Open Projects page", href: "/projects" },
+        chess: { text: "Open Chess lab", href: "/chess" },
+        egg: { text: "Open Egg Hunt", href: "/egg-hunt" },
+        github: { text: "Open GitHub profile", href: "https://github.com/SamJoor?tab=repositories" },
+        linkedin: { text: "Open LinkedIn profile", href: "https://www.linkedin.com/in/samjoor/" },
+        resume: { text: "Download resume", href: "/SAM_JOOR_RESUME.pdf" },
+      };
+
+      if (target && routes[target]) {
+        append([{ kind: "link", text: routes[target].text, href: routes[target].href }]);
+      } else {
+        append([
+          { kind: "error", text: "Usage: open projects | chess | about | egg | github | linkedin | resume" },
+        ]);
+      }
+      return;
+    }
+
+    if (command === "sudo") {
+      append([
+        { kind: "error", text: "Permission denied. Nice try." },
+        { kind: "text", text: "Try: help" },
+      ]);
+      return;
+    }
+
+    if (command === "egg") {
+      await markEggFound("Code");
+      append([
+        { kind: "success", text: "Egg unlocked: Code" },
+        { kind: "text", text: "Progress saved. Check the Egg Hunt page for status and leaderboard." },
+        { kind: "link", text: "Open Egg Hunt", href: "/egg-hunt" },
+      ]);
+      return;
+    }
+
+    append([
+      { kind: "error", text: "Command not found: " + command },
+      { kind: "text", text: "Type help to see available commands." },
+    ]);
+  }
+
+  function submitCommand(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const next = input;
+    setInput("");
+    void runCommand(next);
+  }
+
+  function handleInputKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const next = input;
+      setInput("");
+      void runCommand(next);
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      if (!history.length) return;
+      const nextIndex = historyIndex === null ? history.length - 1 : Math.max(0, historyIndex - 1);
+      setHistoryIndex(nextIndex);
+      setInput(history[nextIndex]);
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      if (historyIndex === null) return;
+      const nextIndex = historyIndex + 1;
+      if (nextIndex >= history.length) {
+        setHistoryIndex(null);
+        setInput("");
+      } else {
+        setHistoryIndex(nextIndex);
+        setInput(history[nextIndex]);
+      }
+      return;
+    }
+
+    if (event.key === "Tab") {
+      event.preventDefault();
+      const partial = input.trim().toLowerCase();
+      if (!partial) return;
+      const matches = terminalCommandNames.filter((name) => name.startsWith(partial));
+      if (matches.length === 1) {
+        setInput(matches[0]);
+      } else if (matches.length > 1) {
+        append([{ kind: "text", text: matches.join("  ") }]);
+      }
+    }
+  }
+
+  function runShortcut(command: string) {
+    inputRef.current?.focus();
+    void runCommand(command);
+  }
+
   return (
-    <div className="py-10">
-      <div className="container-page text-xs text-zinc-500">
-        <div className="flex items-center gap-2">
-          <LogoSJ className="h-6 w-6" />
-          <span>
-            {SITE_NAME} — a LinkedIn-style portfolio parody. Built with love and caffeine.
-          </span>
+    <aside className="sj-terminal-side">
+      <div className="sj-terminal">
+        <div className="sj-terminal-title">
+          <span>SJ TERMINAL</span>
+          <strong>_ [] x</strong>
+        </div>
+        <div
+          className="sj-terminal-body"
+          ref={bodyRef}
+          onClick={() => inputRef.current?.focus()}
+        >
+          {lines.map((line) => <TerminalOutput key={line.id} line={line} />)}
+          <form className="sj-terminal-input-row" onSubmit={submitCommand}>
+            <label htmlFor="sj-terminal-input">Visitor@SamJoor.com:~$</label>
+            <input
+              id="sj-terminal-input"
+              ref={inputRef}
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              onKeyDown={handleInputKeyDown}
+              autoComplete="off"
+              spellCheck={false}
+              aria-label="Terminal command"
+            />
+            <i aria-hidden="true" />
+          </form>
+        </div>
+        <div className="sj-terminal-shortcuts" aria-label="Terminal quick commands">
+          {["help", "projects", "chess", "contact", "egg", "clear"].map((command) => (
+            <button key={command} type="button" onClick={() => runShortcut(command)}>
+              {command}
+            </button>
+          ))}
         </div>
       </div>
+      <div className="sj-tip">
+        <Egg className="size-10" strokeWidth={2.1} aria-hidden="true" />
+        <p><strong>Tip:</strong> There is more here than meets the eye. Try the egg command.</p>
+      </div>
+    </aside>
+  );
+}
+
+function TerminalOutput({ line }: { line: TerminalLine }) {
+  if (line.kind === "prompt") {
+    return <p><span>Visitor@SamJoor.com:~$</span> {line.text}</p>;
+  }
+
+  if (line.kind === "link" && line.href) {
+    return (
+      <p>
+        <a
+          href={line.href}
+          target={line.href.startsWith("http") ? "_blank" : undefined}
+          rel={line.href.startsWith("http") ? "noopener noreferrer" : undefined}
+          download={line.href.endsWith(".pdf") ? "SAM_JOOR_RESUME.pdf" : undefined}
+        >
+          {line.text} <ArrowRight className="size-3" />
+        </a>
+      </p>
+    );
+  }
+
+  if (line.kind === "error") {
+    return <p className="sj-terminal-error">{line.text}</p>;
+  }
+
+  if (line.kind === "success") {
+    return <p className="sj-green">{line.text}</p>;
+  }
+
+  if (line.kind === "command") {
+    const [command, ...rest] = line.text.trim().split(/\s+/);
+    return <TerminalCommand command={command} text={rest.join(" ")} />;
+  }
+
+  return <p>{line.text}</p>;
+}
+
+function TerminalCommand({ command, text }: { command: string; text: string }) {
+  return (
+    <div className="sj-command">
+      <b>{command}</b>
+      <span>{text}</span>
     </div>
   );
 }
 
-/* ---------- Logo ---------- */
-export function LogoSJ({ className = "h-7 w-7" }: { className?: string }) {
+function FeaturedProjects() {
   return (
-    <svg viewBox="0 0 64 64" className={className} xmlns="http://www.w3.org/2000/svg">
-      <rect width="64" height="64" rx="12" fill="#2563EB" />
-      {/* S curve */}
-      <path
-        d="M42 20c-3-3-7-4-11-4-6 0-11 3-11 8 0 9 18 6 18 13 0 4-4 6-9 6-4 0-8-1-11-4"
-        stroke="white"
-        strokeWidth="4"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* J curve */}
-      <path
-        d="M45 20v18c0 7-4 10-10 10-3 0-6-1-8-3"
-        stroke="white"
-        strokeWidth="4"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <section className="sj-projects">
+      <h2><span>SJ&gt;</span> Featured Projects</h2>
+      <div className="sj-project-grid">
+        {projects.map((project) => {
+          const Icon = project.icon;
+          return (
+          <Link href={project.href} key={project.title} className={`sj-project sj-project-${project.tone}`}>
+            <span className="sj-project-icon">
+              <Icon className="size-9" strokeWidth={2.1} aria-hidden="true" />
+            </span>
+            <div>
+              <h3>{project.title}</h3>
+              <p>{project.text}</p>
+              <div>
+                {project.tags.map((tag) => <span key={tag}>{tag}</span>)}
+              </div>
+            </div>
+          </Link>
+        )})}
+      </div>
+    </section>
   );
 }
-
-/* ---------- Info Icon ---------- */
-function InfoIcon(props: any) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="size-4" {...props}>
-      <path
-        d="M12 22C17.5 22 22 17.5 22 12S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path d="M11 10h2v7h-2v-7Z" fill="currentColor" />
-      <path d="M11 7h2v2h-2V7Z" fill="currentColor" />
-    </svg>
-  );
-}
-
-

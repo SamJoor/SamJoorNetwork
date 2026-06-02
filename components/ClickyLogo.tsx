@@ -35,7 +35,7 @@ export default function ClickyLogo({ className = "h-7 w-7", children }: Props) {
       <button
         type="button"
         onClick={handleClick}
-        aria-label="SamJoorNetwork logo"
+        aria-label="SamJoor.com logo"
         className={`inline-flex items-center justify-center select-none transition-transform duration-150 ${
           boom ? "scale-0 rotate-12" : "hover:scale-110"
         } ${className}`}
