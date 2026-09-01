@@ -9,9 +9,30 @@ const projects: ProjectCardData[] = [
   {
     title: "Data Science Capstone",
     date: "2026",
-    blurb: "A Python modeling pipeline that cleans a dataset, trains scikit-learn models, saves model outputs, and generates evaluation plots.",
-    tags: ["Python", "Data Science", "Modeling", "Analysis"],
+    blurb: "A behavior-based malware detection pipeline: cleans a dataset, trains and evaluates scikit-learn models, and generates figures summarizing detection performance.",
+    tags: ["Python", "Malware Detection", "scikit-learn", "Modeling"],
     links: [{ label: "GitHub", href: "https://github.com/SamJoor/Data-Science-Capstone" }],
+  },
+  {
+    title: "QU Poker & Strategy Club App",
+    date: "2026",
+    blurb: "Production-oriented Expo/React Native app for a university poker strategy club: member signups, QR check-ins, engagement points, rewards, and practice-match leaderboards, all non-gambling.",
+    tags: ["React Native", "Expo", "TypeScript", "Supabase"],
+    links: [{ label: "GitHub", href: "https://github.com/SamJoor/QUPOKERAPP" }],
+  },
+  {
+    title: "Oweba",
+    date: "2026",
+    blurb: "A premium web design business I built end to end: marketing site with services, process, and portfolio pages, 3D visuals, and an AI-assisted workflow.",
+    tags: ["Next.js", "Three.js", "OpenAI", "Framer Motion"],
+    links: [{ label: "GitHub", href: "https://github.com/SamJoor/Oweba" }],
+  },
+  {
+    title: "Saints Lawn Maintenance",
+    date: "2026",
+    blurb: "A client website built over the summer for a family-owned lawn care and landscaping business in the Greater Houston area, with service info, a photo gallery, and quote requests.",
+    tags: ["Next.js", "Client Site", "Vercel"],
+    links: [{ label: "Live", href: "https://saintslawnmaintenance.com" }],
   },
   {
     title: "Chess Minigame",
