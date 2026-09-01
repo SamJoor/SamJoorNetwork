@@ -14,12 +14,16 @@
 
   html {
     scroll-behavior: smooth;
+    background: #020403;
+    overscroll-behavior-y: none;
   }
 
   body {
     @apply min-h-screen bg-slate-50 text-slate-950 antialiased;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     overflow-x: hidden;
+    background: #020403;
+    overscroll-behavior-y: none;
   }
 
   button,

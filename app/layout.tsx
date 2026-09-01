@@ -1,4 +1,12 @@
+import type { Viewport } from "next";
 import "../styles/globals.css";
+
+export const viewport: Viewport = {
+  themeColor: "#020403",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata = {
   title: "SamJoor.com",
