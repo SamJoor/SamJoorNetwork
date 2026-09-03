@@ -31,6 +31,7 @@ export default function ChessPage() {
   const [gameOver, setGameOver] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [eloChange, setEloChange] = useState<number | null>(null);
+  const [resultSaveError, setResultSaveError] = useState<string | null>(null);
 
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
 
@@ -387,25 +388,34 @@ export default function ChessPage() {
   setResult(outcome);
   setGameOver(true);
   setThinking(false);
+  setResultSaveError(null);
 
-  // ✅ Fire-and-forget backend updates (don’t block UI)
-  try {
-    const res = await fetch("/api/chess/result", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username,
-        winner,
-        playerColor: "w",
-        difficulty,
-        aiMoves: aiMoves.current,
-      }),
-    });
+  if (!username.trim()) {
+    setResultSaveError("Enter a name above before playing to appear on the leaderboard.");
+  } else {
+    // ✅ Fire-and-forget backend updates (don’t block UI)
+    try {
+      const res = await fetch("/api/chess/result", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username,
+          winner,
+          playerColor: "w",
+          difficulty,
+        }),
+      });
 
-    const data = await res.json();
-    setEloChange(data.elo ?? null);
-  } catch (e) {
-    console.error("result update failed", e);
+      const data = await res.json();
+      if (!res.ok) {
+        setResultSaveError(data?.error || "Result wasn't saved.");
+      } else {
+        setEloChange(data.elo ?? null);
+      }
+    } catch (e) {
+      console.error("result update failed", e);
+      setResultSaveError("Result wasn't saved — network error.");
+    }
   }
 
   try {
@@ -434,6 +444,7 @@ export default function ChessPage() {
     setGameOver(false);
     setResult(null);
     setEloChange(null);
+    setResultSaveError(null);
     setLastMoveSquares({});
     clearHighlights();
     setCheckSquares({});
@@ -493,6 +504,10 @@ export default function ChessPage() {
                 <div className="text-sm">
                   New Rating: <strong>{eloChange}</strong>
                 </div>
+              )}
+
+              {resultSaveError && (
+                <div className="mt-2 text-xs text-red-600">{resultSaveError}</div>
               )}
 
               <div className="flex gap-3 justify-center mt-4">

@@ -1,63 +1,66 @@
 "use client";
 import { useEffect, useState } from "react";
-import { unlockEgg } from "@/lib/eggProgress";
+import { getEggName } from "@/lib/eggs";
+
+const NAME_KEY = "egg_hunter_name";
+
+type Status = "idle" | "saving" | "saved" | "error";
 
 export default function SecretModal() {
   const [open, setOpen] = useState(false);
-  const [unlockedLabel, setUnlockedLabel] = useState<string | null>(null);
+  const [eggId, setEggId] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [status, setStatus] = useState<Status>("idle");
 
   useEffect(() => {
-    let buf = "";
-
-    function normalizeKey(e: KeyboardEvent): string {
-      // ignore typing in inputs/textareas/contenteditable
-      const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) {
-        return "";
-      }
-      const k = e.key.toLowerCase();
-      // letters & digits only
-      if (/^[a-z0-9]$/.test(k)) return k;
-      return "";
+    try {
+      setName(localStorage.getItem(NAME_KEY) || "");
+    } catch {
+      // ignore
     }
-
-    async function maybeUnlockFromBuffer(b: string) {
-      // check longest first; buffer holds last 10 chars
-      if (b.endsWith("samjoor")) {
-        await unlockEgg("samjoor");
-        setUnlockedLabel("SamJoor Cipher");
-        setOpen(true);
-        // notify listeners (e.g., Egg Hunt page) this egg was solved
-        window.dispatchEvent(new CustomEvent("egg:unlocked", { detail: { id: "samjoor" } }));
-        return;
-      }
-      if (b.endsWith("teapot") || b.endsWith("418")) {
-        await unlockEgg("418");
-        setUnlockedLabel("(418)");
-        setOpen(true);
-        window.dispatchEvent(new CustomEvent("egg:unlocked", { detail: { id: "teapot" } }));
-        return;
-      }
-      // add more typed-answer eggs here if you want, e.g.:
-      // if (b.endsWith("retro")) { await unlockEgg("retro"); ... }
-    }
-
-    const onKey = (e: KeyboardEvent) => {
-      const k = normalizeKey(e);
-      if (!k) return;
-      buf = (buf + k).slice(-10); // keep last 10 chars
-      void maybeUnlockFromBuffer(buf);
-    };
-
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  if (!open) return null;
+  useEffect(() => {
+    const onUnlock = (e: Event) => {
+      const detail = (e as CustomEvent<{ id?: string }>).detail;
+      if (!detail?.id) return;
+      setEggId(detail.id);
+      setStatus("idle");
+      setOpen(true);
+    };
+    window.addEventListener("egg:unlocked", onUnlock);
+    return () => window.removeEventListener("egg:unlocked", onUnlock);
+  }, []);
+
+  async function submitToLeaderboard() {
+    const cleaned = name.trim();
+    if (!eggId || cleaned.length < 2) return;
+
+    setStatus("saving");
+    try {
+      const res = await fetch("/api/eggs/leaderboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ egg_id: eggId, name: cleaned }),
+      });
+      if (!res.ok) throw new Error("request failed");
+
+      try {
+        localStorage.setItem(NAME_KEY, cleaned);
+      } catch {
+        // ignore
+      }
+      setStatus("saved");
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  if (!open || !eggId) return null;
 
   return (
     <div
-      className="fixed inset-0 z-[80] bg-black/40 backdrop-blur-sm flex items-center justify-center"
+      className="fixed inset-0 z-[80] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={() => setOpen(false)}
     >
       <div
@@ -67,15 +70,41 @@ export default function SecretModal() {
         aria-modal="true"
         aria-label="Secret unlocked"
       >
-        <h3 className="text-lg font-semibold">
-          {unlockedLabel ? `Unlocked: ${unlockedLabel}` : "Good work—this one was hard."}
-        </h3>
+        <h3 className="text-lg font-semibold">Unlocked: {getEggName(eggId)}</h3>
         <p className="mt-2 text-sm text-zinc-700">
-          Your progress has been saved locally. Check the Egg Hunt page to see your status and the leaderboard.
+          Nice find! Add your name to this egg's leaderboard.
         </p>
-        <a href="/egg-hunt" className="btn-primary mt-4 inline-block">
-          View Egg Hunt
-        </a>
+
+        <input
+          className="mt-4 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          placeholder="Your name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={40}
+        />
+
+        {status === "error" && (
+          <p className="mt-2 text-xs text-red-600">Couldn't save that — try again.</p>
+        )}
+        {status === "saved" && (
+          <p className="mt-2 text-xs text-green-600">Added to the leaderboard!</p>
+        )}
+
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          <button
+            className="btn-primary"
+            onClick={submitToLeaderboard}
+            disabled={status === "saving" || status === "saved" || name.trim().length < 2}
+          >
+            {status === "saved" ? "Saved" : status === "saving" ? "Saving…" : "Add to leaderboard"}
+          </button>
+          <a href="/egg-hunt" className="btn">
+            View Egg Hunt
+          </a>
+          <button className="btn" onClick={() => setOpen(false)}>
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );

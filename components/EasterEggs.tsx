@@ -5,9 +5,14 @@ import { useEffect } from "react";
 import { markEggFound, isEggFound } from "@/lib/eggProgress";
 import { enableRetro } from "@/lib/retro";
 
+function isTypingTarget(e: KeyboardEvent) {
+  const t = e.target as HTMLElement | null;
+  return !!t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
+}
+
 export default function EasterEggs() {
   /** -----------------------------
-   *  1) KONAMI CODE (↑↑↓↓←→←→BA)
+   *  "Null" — KONAMI CODE (↑↑↓↓←→←→BA)
    *  ----------------------------- */
   useEffect(() => {
     const seq = [
@@ -18,15 +23,14 @@ export default function EasterEggs() {
     let i = 0;
 
     const onKey = async (e: KeyboardEvent) => {
+      if (isTypingTarget(e)) return;
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
       const target = seq[i].length === 1 ? seq[i].toLowerCase() : seq[i];
       if (key === target) {
         i++;
         if (i === seq.length) {
           i = 0;
-          if (!(await isEggFound("konami"))) {
-            await markEggFound("konami");
-          }
+          if (!(await isEggFound("Null"))) await markEggFound("Null");
         }
       } else {
         i = 0;
@@ -38,27 +42,27 @@ export default function EasterEggs() {
   }, []);
 
   /** -----------------------------------------
-   *  2) NAME/CIPHER EGG — type "samjoor"
-   *     (You present a Vigenère puzzle; solution is "samjoor")
+   *  "pentagon" — type "samjoor" (Vigenère puzzle answer)
+   *  "Teapot"   — type "teapot" or "418" (HTTP 418 joke)
    *  ----------------------------------------- */
   useEffect(() => {
     let buf = "";
     let timer: number | undefined;
 
     const onKey = async (e: KeyboardEvent) => {
-      if (e.key.length !== 1) return; // letters/numbers only
-      buf += e.key.toLowerCase();
-      if (buf.length > 64) buf = buf.slice(-64);
+      if (isTypingTarget(e)) return;
+      if (e.key.length !== 1) return;
+      buf = (buf + e.key.toLowerCase()).slice(-16);
 
-      // idle reset (3s)
       if (timer) window.clearTimeout(timer);
       timer = window.setTimeout(() => (buf = ""), 3000);
 
-      if (buf.includes("samjoor")) {
-        if (!(await isEggFound("samjoor"))) {
-          await markEggFound("samjoor");
-        }
-        buf = ""; // avoid spamming
+      if (buf.endsWith("samjoor")) {
+        if (!(await isEggFound("pentagon"))) await markEggFound("pentagon");
+        buf = "";
+      } else if (buf.endsWith("teapot") || buf.endsWith("418")) {
+        if (!(await isEggFound("Teapot"))) await markEggFound("Teapot");
+        buf = "";
       }
     };
 
@@ -70,13 +74,11 @@ export default function EasterEggs() {
   }, []);
 
   /** -------------------------------------------------
-   *  3) RETRO MODE via MORSE input:
-   *     Type ".-." " " "." " " "-" " " ".-." " " "---"
-   *     (spaces or 800ms gap end a letter; Enter adds space)
-   *     When "retro" decoded -> enable retro for 60s + unlock.
+   *  "Code" — MORSE input decoding to "retro"
+   *     (spaces or 800ms gap end a letter; Enter adds a word space)
+   *     Also enables a 60s retro visual mode.
    *  ------------------------------------------------- */
   useEffect(() => {
-    // Minimal Morse table (letters a-z)
     const MORSE: Record<string, string> = {
       ".-": "a", "-...": "b", "-.-.": "c", "-..": "d", ".": "e", "..-.": "f",
       "--.": "g", "....": "h", "..": "i", ".---": "j", "-.-": "k", ".-..": "l",
@@ -85,48 +87,38 @@ export default function EasterEggs() {
       "-.--": "y", "--..": "z",
     };
 
-    let token = ""; // current dot-dash token for one letter
-    let text = "";  // decoded running text
+    let token = "";
+    let text = "";
     let letterTimer: number | undefined;
 
     const flushToken = () => {
       if (!token) return;
       const ch = MORSE[token] || "?";
-      text += ch;
+      text = (text + ch).slice(-32);
       token = "";
 
-      // keep buffer manageable
-      if (text.length > 32) text = text.slice(-32);
-
       if (text.includes("retro")) {
-        // Enable retro for 60 seconds
         enableRetro(60_000);
         (async () => {
-          if (!(await isEggFound("retro"))) await markEggFound("retro");
+          if (!(await isEggFound("Code"))) await markEggFound("Code");
         })();
-        text = ""; // reset to avoid loops
+        text = "";
       }
     };
 
     const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(e)) return;
       const k = e.key;
 
       if (k === "." || k === "-") {
-        // building a Morse letter
         token += k;
-
-        // End of letter when no dot/dash for 800ms
         if (letterTimer) window.clearTimeout(letterTimer);
         letterTimer = window.setTimeout(flushToken, 800);
       } else if (k === " " || k === "/") {
-        // Explicit letter/word separator
         flushToken();
       } else if (k === "Enter") {
-        // End of word
         flushToken();
         text += " ";
-      } else {
-        // ignore other keys
       }
     };
 
@@ -136,13 +128,15 @@ export default function EasterEggs() {
       if (letterTimer) window.clearTimeout(letterTimer);
     };
   }, []);
+
+  // Optional direct unlock via ?retro=1 (also counts as finding "Code")
   useEffect(() => {
     try {
       const url = new URL(window.location.href);
       if (url.searchParams.get("retro") === "1") {
         enableRetro(60_000);
         (async () => {
-          if (!(await isEggFound("retro"))) await markEggFound("retro");
+          if (!(await isEggFound("Code"))) await markEggFound("Code");
         })();
       }
     } catch {

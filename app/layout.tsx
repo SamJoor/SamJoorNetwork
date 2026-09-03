@@ -1,5 +1,8 @@
 import type { Viewport } from "next";
 import "../styles/globals.css";
+import EasterEggs from "@/components/EasterEggs";
+import SecretModal from "@/components/SecretModal";
+import RetroStyle from "@/components/RetroStyle";
 
 export const viewport: Viewport = {
   themeColor: "#020403",
@@ -25,7 +28,12 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen">
+        {children}
+        <EasterEggs />
+        <SecretModal />
+        <RetroStyle />
+      </body>
     </html>
   );
 }

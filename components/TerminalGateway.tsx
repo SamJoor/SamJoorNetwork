@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { markEggFound } from "@/lib/eggProgress";
-import { LogoSJ } from "./DevLinkd";
+import ClickyLogo from "./ClickyLogo";
 
 type GatewayLine = {
   id: number;
@@ -284,7 +284,7 @@ export default function TerminalGateway() {
       <section className={terminalClassName} aria-label="SamJoor.com terminal gateway">
         <div className="sj-gateway-top">
           <div className="sj-gateway-brand">
-            <LogoSJ className="sj-logo-mark" />
+            <ClickyLogo className="sj-logo-mark" />
           </div>
           <div className="sj-window-controls" aria-label="Terminal window controls">
             <button type="button" aria-label="Minimize terminal" onClick={handleMinimize}>

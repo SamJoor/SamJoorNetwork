@@ -23,8 +23,8 @@ export default function ClickyLogo({ className = "h-7 w-7", children }: Props) {
       setBoom(true);
       setTimeout(() => setBoom(false), 800);
 
-      if (!(await isEggFound("clicky-logo"))) {
-        await markEggFound("clicky-logo");
+      if (!(await isEggFound("Seal"))) {
+        await markEggFound("Seal");
       }
       setClicks(0);
     }
