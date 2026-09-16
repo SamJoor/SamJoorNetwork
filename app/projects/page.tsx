@@ -25,7 +25,10 @@ const projects: ProjectCardData[] = [
     date: "2026",
     blurb: "A premium web design business I built end to end: marketing site with services, process, and portfolio pages, 3D visuals, and an AI-assisted workflow.",
     tags: ["Next.js", "Three.js", "OpenAI", "Framer Motion"],
-    links: [{ label: "GitHub", href: "https://github.com/SamJoor/Oweba" }],
+    links: [
+      { label: "Live", href: "https://oweba.agency" },
+      { label: "GitHub", href: "https://github.com/SamJoor/Oweba" },
+    ],
   },
   {
     title: "Saints Lawn Maintenance",
