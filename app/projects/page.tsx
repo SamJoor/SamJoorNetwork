@@ -59,16 +59,6 @@ const projects: ProjectCardData[] = [
     links: [{ label: "GitHub", href: "https://github.com/SamJoor/Java-Projects" }],
   },
   {
-    title: "QUPSC Website",
-    date: "2025",
-    blurb: "A club website for the Quinnipiac University Political Science Club, built as a real public-facing web project.",
-    tags: ["TypeScript", "Web", "Club Site", "Vercel"],
-    links: [
-      { label: "Live", href: "https://qupsc-website.vercel.app" },
-      { label: "GitHub", href: "https://github.com/SamJoor/QUPSC-Website" },
-    ],
-  },
-  {
     title: "QUPDT Website",
     date: "2025",
     blurb: "A fraternity website project focused on clear information architecture, public presentation, and deployment.",
