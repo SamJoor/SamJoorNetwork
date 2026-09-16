@@ -35,6 +35,12 @@ export default function ChessPage() {
 
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
 
+  const [botRank, setBotRank] = useState<{
+    elo: number;
+    rank: string;
+    gamesPlayed: number;
+  } | null>(null);
+
   const aiMoves = useRef<{ positionFen: string; uci: string }[]>([]);
 
   // Engine worker
@@ -111,6 +117,16 @@ export default function ChessPage() {
     }
   }
 
+  async function loadBotRank() {
+    try {
+      const res = await fetch("/api/chess/bot-rank", { cache: "no-store" });
+      const data = await res.json();
+      if (res.ok) setBotRank({ elo: data.elo, rank: data.rank, gamesPlayed: data.gamesPlayed });
+    } catch (e) {
+      console.error("bot rank fetch failed", e);
+    }
+  }
+
   // Load leaderboard + username on mount (and retry once so users don't need to click Refresh)
   useEffect(() => {
     let cancelled = false;
@@ -119,7 +135,7 @@ export default function ChessPage() {
     if (saved) setUsername(saved);
 
     (async () => {
-      await loadLeaderboard();
+      await Promise.all([loadLeaderboard(), loadBotRank()]);
 
       // Retry once after a short delay (fixes "only appears after refresh")
       if (!cancelled) {
@@ -431,9 +447,10 @@ export default function ChessPage() {
     console.error("log update failed", e);
   }
 
-  // Refresh leaderboard after backend commits
+  // Refresh leaderboard + model rank after backend commits
   setTimeout(() => {
     loadLeaderboard();
+    loadBotRank();
   }, 250);
 }
 
@@ -529,6 +546,23 @@ export default function ChessPage() {
           <p className="mt-2 text-sm leading-6 text-slate-600">
             Pick a name, choose a difficulty, and play the network bot.
           </p>
+
+          <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-black/10 bg-white/70 px-3 py-2 text-sm">
+            <span className="font-semibold">Model rank</span>
+            <span className="text-zinc-600 text-right">
+              {botRank ? (
+                <>
+                  {botRank.rank} <span className="text-zinc-400">·</span> {botRank.elo}
+                  <span className="block text-[11px] text-zinc-500">
+                    learned from {botRank.gamesPlayed} game{botRank.gamesPlayed === 1 ? "" : "s"}
+                  </span>
+                </>
+              ) : (
+                "…"
+              )}
+            </span>
+          </div>
+
         <input
           className="mt-5 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-medium outline-none focus:border-blue-500"
           placeholder="First + last name"

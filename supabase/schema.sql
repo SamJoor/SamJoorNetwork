@@ -54,6 +54,18 @@ create table if not exists chess_learned_moves (
 );
 alter table chess_learned_moves enable row level security;
 
+create table if not exists chess_bot_state (
+  id text primary key default 'default',
+  elo integer not null default 900,
+  wins integer not null default 0,
+  losses integer not null default 0,
+  draws integer not null default 0,
+  games_played integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+alter table chess_bot_state enable row level security;
+insert into chess_bot_state (id) values ('default') on conflict (id) do nothing;
+
 create table if not exists egg_events (
   id uuid primary key default gen_random_uuid(),
   egg_id text not null,
