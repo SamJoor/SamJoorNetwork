@@ -14,13 +14,6 @@ const projects: ProjectCardData[] = [
     links: [{ label: "GitHub", href: "https://github.com/SamJoor/Data-Science-Capstone" }],
   },
   {
-    title: "QU Poker & Strategy Club App",
-    date: "2026",
-    blurb: "Production-oriented Expo/React Native app for a university poker strategy club: member signups, QR check-ins, engagement points, rewards, and practice-match leaderboards, all non-gambling.",
-    tags: ["React Native", "Expo", "TypeScript", "Supabase"],
-    links: [{ label: "GitHub", href: "https://github.com/SamJoor/QUPOKERAPP" }],
-  },
-  {
     title: "Oweba",
     date: "2026",
     blurb: "A premium web design business I built end to end: marketing site with services, process, and portfolio pages, 3D visuals, and an AI-assisted workflow.",
@@ -36,6 +29,23 @@ const projects: ProjectCardData[] = [
     blurb: "A client website built over the summer for a family-owned lawn care and landscaping business in the Greater Houston area, with service info, a photo gallery, and quote requests.",
     tags: ["Next.js", "Client Site", "Vercel"],
     links: [{ label: "Live", href: "https://saintslawnmaintenance.com" }],
+  },
+  {
+    title: "QUPDT Website",
+    date: "2025",
+    blurb: "A fraternity website project focused on clear information architecture, public presentation, and deployment.",
+    tags: ["TypeScript", "Web", "Organization Site", "Vercel"],
+    links: [
+      { label: "Live", href: "https://ctepsilonphidelts.org" },
+      { label: "GitHub", href: "https://github.com/SamJoor/QUPDTwebsite" },
+    ],
+  },
+  {
+    title: "QU Poker & Strategy Club App",
+    date: "2026",
+    blurb: "Production-oriented Expo/React Native app for a university poker strategy club: member signups, QR check-ins, engagement points, rewards, and practice-match leaderboards, all non-gambling.",
+    tags: ["React Native", "Expo", "TypeScript", "Supabase"],
+    links: [{ label: "GitHub", href: "https://github.com/SamJoor/QUPOKERAPP" }],
   },
   {
     title: "Chess Minigame",
@@ -60,16 +70,6 @@ const projects: ProjectCardData[] = [
     blurb: "Java class projects and practice work, useful as a clean Computer Science signal beside the web and Python work.",
     tags: ["Java", "Computer Science", "OOP", "Coursework"],
     links: [{ label: "GitHub", href: "https://github.com/SamJoor/Java-Projects" }],
-  },
-  {
-    title: "QUPDT Website",
-    date: "2025",
-    blurb: "A fraternity website project focused on clear information architecture, public presentation, and deployment.",
-    tags: ["TypeScript", "Web", "Organization Site", "Vercel"],
-    links: [
-      { label: "Live", href: "https://qupd-twebsite.vercel.app" },
-      { label: "GitHub", href: "https://github.com/SamJoor/QUPDTwebsite" },
-    ],
   },
 ];
 
