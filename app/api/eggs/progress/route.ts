@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { rateLimit, readJson } from "@/lib/server/apiGuards";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const limited = rateLimit(req, "eggs-progress-get", 60, 60_000);
+  if (limited) return limited;
+
   const cookieStore = await cookies();
   const found = cookieStore.get("eggs-found")?.value;
   if (!found) return NextResponse.json({ found: [] });

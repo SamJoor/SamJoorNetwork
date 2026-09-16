@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/server/supabase";
-import { cleanText, rateLimit, readJson } from "@/lib/server/apiGuards";
+import { cleanDisplayName, rateLimit, readJson } from "@/lib/server/apiGuards";
 
 export const dynamic = "force-dynamic";
 
@@ -29,9 +29,12 @@ export async function POST(req: Request) {
   const body = await readJson<Partial<Body>>(req, 4_096);
   if (!body) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
 
-  const username = cleanText(body.username, 40);
+  const username = cleanDisplayName(body.username, 40);
   if (!username) {
-    return NextResponse.json({ error: "Username required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Username required (letters, numbers, spaces, - _ . ' only, 2-40 chars)" },
+      { status: 400 }
+    );
   }
 
   const { winner, playerColor, difficulty } = body;
@@ -57,7 +60,7 @@ export async function POST(req: Request) {
 
   if (selErr) {
     console.error("select chess_players error:", selErr);
-    return NextResponse.json({ error: selErr.message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to load player record" }, { status: 500 });
   }
 
   const currentElo = existing?.elo ?? 800;
@@ -91,7 +94,7 @@ export async function POST(req: Request) {
 
   if (upErr) {
     console.error("upsert chess_players error:", upErr);
-    return NextResponse.json({ error: upErr.message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to save result" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, elo: nextElo });

@@ -17,7 +17,7 @@ export async function GET(req: Request) {
   if (error) {
     console.error("Leaderboard fetch error:", error);
     return NextResponse.json(
-      { top: [], error: error.message },
+      { top: [], error: "Failed to load leaderboard" },
       { status: 500, headers: { "Cache-Control": "no-store, max-age=0" } }
     );
   }

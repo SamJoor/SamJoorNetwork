@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/server/supabase";
-import { cleanText, rateLimit, readJson } from "@/lib/server/apiGuards";
+import { cleanDisplayName, cleanText, rateLimit, readJson } from "@/lib/server/apiGuards";
 
 const allowedEggIds = new Set(["Null", "Seal", "pentagon", "Code", "Teapot"]);
 
 export async function GET(req: Request) {
+  const limited = rateLimit(req, "eggs-leaderboard-get", 60, 60_000);
+  if (limited) return limited;
+
   const { searchParams } = new URL(req.url);
   const egg = cleanText(searchParams.get("egg"), 40); // optional filter per-egg
 
@@ -12,7 +15,10 @@ export async function GET(req: Request) {
   if (egg && allowedEggIds.has(egg)) q = q.eq("egg_id", egg);
 
   const { data, error } = await q;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("egg_events fetch error:", error);
+    return NextResponse.json({ error: "Failed to load leaderboard" }, { status: 500 });
+  }
   return NextResponse.json({ leaderboard: data });
 }
 
@@ -22,9 +28,9 @@ export async function POST(req: Request) {
 
   const body = await readJson(req, 2_048) ?? {};
   const { egg_id, name } = body as { egg_id?: string; name?: string };
-  const cleanedName = cleanText(name, 40);
+  const cleanedName = cleanDisplayName(name, 40);
 
-  if (!egg_id || !allowedEggIds.has(egg_id) || !cleanedName || cleanedName.length < 2) {
+  if (!egg_id || !allowedEggIds.has(egg_id) || !cleanedName) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
@@ -32,6 +38,9 @@ export async function POST(req: Request) {
     .from("egg_events")
     .insert({ egg_id, name: cleanedName });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("egg_events insert error:", error);
+    return NextResponse.json({ error: "Failed to save entry" }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }

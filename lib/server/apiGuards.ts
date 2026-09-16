@@ -59,6 +59,14 @@ export function cleanText(value: unknown, maxLength: number) {
   return cleaned;
 }
 
+const SAFE_NAME_RE = /^[a-zA-Z0-9][a-zA-Z0-9 _.\-']{0,38}[a-zA-Z0-9]$/;
+
+export function cleanDisplayName(value: unknown, maxLength: number) {
+  const cleaned = cleanText(value, maxLength);
+  if (!cleaned || cleaned.length < 2 || !SAFE_NAME_RE.test(cleaned)) return null;
+  return cleaned;
+}
+
 export function isUuid(value: unknown) {
   return (
     typeof value === "string" &&
